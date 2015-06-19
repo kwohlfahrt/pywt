@@ -61,12 +61,9 @@ int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict inpu
                                                 TYPE * const restrict output, const size_t O,
                                                 MODE mode);
 
-/* TODO
- * for SWT
- * int upsampled_filter_convolution(const TYPE* input, const int N,
- *                                  const TYPE* filter, const int F,
- *                                  TYPE* output, int step, int mode);
- */
-
+int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, const size_t N,
+                                             const TYPE * const restrict filter, const size_t F,
+                                             TYPE * const restrict output,
+                                             const size_t step, const MODE mode);
 #undef restrict
 #endif /* TYPE */
