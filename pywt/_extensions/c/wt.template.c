@@ -403,9 +403,10 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
  * Approximation at specified level
  * input - approximation coeffs from upper level or signal if level == 1
  */
-int CAT(TYPE, _swt_a)(TYPE input[], size_t input_len,
-                      Wavelet* wavelet,
-                      TYPE output[], size_t output_len, unsigned char level){
+int CAT(TYPE, _swt_a)(const TYPE * const restrict input, const size_t input_len,
+                      const Wavelet * const restrict wavelet,
+                      TYPE * const restrict output, const size_t output_len,
+                      const unsigned char level){
     return CAT(TYPE, _upsampled_filter_convolution)(input, input_len,
                                                     wavelet->CAT(dec_lo_, TYPE),
                                                     wavelet->dec_len,
@@ -416,9 +417,10 @@ int CAT(TYPE, _swt_a)(TYPE input[], size_t input_len,
 /* Details at specified level
  * input - approximation coeffs from upper level or signal if level == 1
  */
-int CAT(TYPE, _swt_d)(TYPE input[], size_t input_len,
-                      Wavelet* wavelet,
-                      TYPE output[], size_t output_len, unsigned char level){
+int CAT(TYPE, _swt_d)(const TYPE * const restrict input, const size_t input_len,
+                      const Wavelet * const restrict wavelet,
+                      TYPE * const restrict output, const size_t output_len,
+                      const unsigned char level){
     return CAT(TYPE, _upsampled_filter_convolution)(input, input_len,
                                                     wavelet->CAT(dec_hi_, TYPE),
                                                     wavelet->dec_len,

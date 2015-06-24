@@ -37,11 +37,14 @@ cdef extern from "c/wt.h":
                          double * const output, const size_t output_len,
                          const Wavelet * const wavelet, const MODE mode)
 
-    cdef int double_swt_a(double input[], pywt_index_t input_len, Wavelet* wavelet,
-                          double output[], pywt_index_t output_len, int level)
-    cdef int double_swt_d(double input[], pywt_index_t input_len, Wavelet* wavelet,
-                          double output[], pywt_index_t output_len, int level)
-
+    cdef int double_swt_a(const double * const input, const size_t input_len,
+                          const Wavelet * const wavelet,
+                          double * const output, const size_t output_len,
+                          const unsigned char level)
+    cdef int double_swt_d(const double * const input, const size_t input_len,
+                          const Wavelet * const wavelet,
+                          double * const output, const size_t output_len,
+                          const unsigned char level)
 
     cdef int float_downcoef_axis(const float * const input, const ArrayInfo input_info,
                                  float * const output, const ArrayInfo output_info,
@@ -73,7 +76,11 @@ cdef extern from "c/wt.h":
                         float * const output, const size_t output_len,
                         const Wavelet * const wavelet, const MODE mode)
 
-    cdef int float_swt_a(float input[], pywt_index_t input_len, Wavelet* wavelet,
-                         float output[], pywt_index_t output_len, int level)
-    cdef int float_swt_d(float input[], pywt_index_t input_len, Wavelet* wavelet,
-                         float output[], pywt_index_t output_len, int level)
+    cdef int float_swt_a(const float * const input, const size_t input_len,
+                         const Wavelet * const wavelet,
+                         float * const output, const size_t output_len,
+                         const unsigned char level)
+    cdef int float_swt_d(const float * const input, const size_t input_len,
+                         const Wavelet * const wavelet,
+                         float * const output, const size_t output_len,
+                         const unsigned char level)
