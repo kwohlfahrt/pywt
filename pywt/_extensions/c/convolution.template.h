@@ -64,6 +64,6 @@ int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict inpu
 int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, const size_t N,
                                              const TYPE * const restrict filter, const size_t F,
                                              TYPE * const restrict output,
-                                             const size_t step, const MODE mode);
+                                             const size_t step, const size_t shift);
 #undef restrict
 #endif /* TYPE */

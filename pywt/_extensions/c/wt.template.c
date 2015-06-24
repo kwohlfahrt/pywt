@@ -399,67 +399,55 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
         return -1;
 }
 
-/* basic SWT step (TODO: optimize) */
-int CAT(TYPE, _swt_)(TYPE input[], pywt_index_t input_len,
-                     const TYPE filter[], pywt_index_t filter_len,
-                     TYPE output[], pywt_index_t output_len, int level){
-
-    TYPE * e_filter;
-    pywt_index_t i, e_filter_len;
-    int ret;
-
-    if(level < 1)
-        return -1;
-
-    if(level > swt_max_level(input_len))
-        return -2;
-
-    if(output_len != swt_buffer_length(input_len))
-        return -1;
-
-    /* TODO: quick hack, optimize */
-    if(level > 1){
-        /* allocate filter first */
-        e_filter_len = filter_len << (level-1);
-        e_filter = wtcalloc(e_filter_len, sizeof(TYPE));
-        if(e_filter == NULL)
-            return -1;
-
-        /* compute upsampled filter values */
-        for(i = 0; i < filter_len; ++i){
-            e_filter[i << (level-1)] = filter[i];
-        }
-        ret = CAT(TYPE, _downsampling_convolution)(input, input_len, e_filter,
-                                                   e_filter_len, output, 1,
-                                                   MODE_PERIODIZATION);
-        wtfree(e_filter);
-        return ret;
-
-    } else {
-        return CAT(TYPE, _downsampling_convolution)(input, input_len, filter,
-                                                    filter_len, output, 1,
-                                                    MODE_PERIODIZATION);
-    }
-}
-
 /*
  * Approximation at specified level
  * input - approximation coeffs from upper level or signal if level == 1
  */
-int CAT(TYPE, _swt_a)(TYPE input[], pywt_index_t input_len, Wavelet* wavelet,
-                      TYPE output[], pywt_index_t output_len, int level){
-    return CAT(TYPE, _swt_)(input, input_len, wavelet->CAT(dec_lo_, TYPE),
-                            wavelet->dec_len, output, output_len, level);
+int CAT(TYPE, _swt_a)(TYPE input[], size_t input_len,
+                      Wavelet* wavelet,
+                      TYPE output[], size_t output_len, unsigned char level){
+    return CAT(TYPE, _upsampled_filter_convolution)(input, input_len,
+                                                    wavelet->CAT(dec_lo_, TYPE),
+                                                    wavelet->dec_len,
+                                                    output,
+                                                    1 << (level-1), 0);
 }
 
 /* Details at specified level
  * input - approximation coeffs from upper level or signal if level == 1
  */
-int CAT(TYPE, _swt_d)(TYPE input[], pywt_index_t input_len, Wavelet* wavelet,
-                      TYPE output[], pywt_index_t output_len, int level){
-    return CAT(TYPE, _swt_)(input, input_len, wavelet->CAT(dec_hi_, TYPE),
-                            wavelet->dec_len, output, output_len, level);
+int CAT(TYPE, _swt_d)(TYPE input[], size_t input_len,
+                      Wavelet* wavelet,
+                      TYPE output[], size_t output_len, unsigned char level){
+    return CAT(TYPE, _upsampled_filter_convolution)(input, input_len,
+                                                    wavelet->CAT(dec_hi_, TYPE),
+                                                    wavelet->dec_len,
+                                                    output,
+                                                    1 << (level-1), 0);
 }
 
+int CAT(TYPE, _iswt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a_len,
+                     const TYPE * const restrict coeffs_d, const size_t coeffs_d_len,
+                     const Wavelet * const wavelet,
+                     TYPE * const restrict output, const size_t output_len,
+                     const unsigned char level){
+    int r;
+    if ((r = CAT(TYPE, _upsampled_filter_convolution)(coeffs_a, coeffs_a_len,
+                                                      wavelet->CAT(rec_lo_, TYPE),
+                                                      wavelet->rec_len,
+                                                      output, 1 << (level-1), 1 << (level-1))))
+        return r;
+    if ((r = CAT(TYPE, _upsampled_filter_convolution)(coeffs_d, coeffs_d_len,
+                                                      wavelet->CAT(rec_hi_, TYPE),
+                                                      wavelet->rec_len,
+                                                      output, 1 << (level-1), 1 << (level-1))))
+        return r;
+    {
+        size_t i;
+        for(i = 0; i < output_len; ++i)
+            output[i] /= 2;
+    }
+    return 0;
+}
 #endif /* TYPE */
 #undef restrict

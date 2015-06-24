@@ -492,58 +492,50 @@ int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict inpu
 int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, const size_t N,
                                              const TYPE * const restrict filter, const size_t F,
                                              TYPE * const restrict output,
-                                             const size_t step, const MODE mode)
+                                             const size_t step, const size_t shift)
 {
-    size_t const start = F * step / 2;
+    size_t const start = F * step / 2 - shift;
     size_t i = start, o = 0;
 
     for (; i < F * step && i < N; ++i, ++o) {
-        TYPE sum = 0;
         size_t j = 0;
         for (; j * step <= i; ++j)
-            sum += input[i-(j * step)] * filter[j];
-        while (j < F) {
+            output[o] += input[i-(j * step)] * filter[j];
+        while (j < F){
             size_t k;
             for (k = step - 1 - (i % step); k < N && j < F; k += step, ++j)
-                sum += input[N-1-k] * filter[j];
+                output[o] += input[N-1-k] * filter[j];
         }
-        output[o] = sum;
     }
     for (; i < N; ++i, ++o){
-        TYPE sum = 0;
         size_t j;
         for (j = 0; j < F; ++j)
-            sum += input[i-(j * step)] * filter[j];
-        output[o] = sum;
+            output[o] += input[i-(j * step)] * filter[j];
     }
     for (; i < F * step && i < N + start; ++i, ++o) {
-        TYPE sum = 0;
         size_t j = 0;
         while (i-(j * step) >= N){
             size_t k;
             for (k = i % step; k < N && i - (j * step) >= N; k += step, ++j)
-                sum += input[k] * filter[(i-N)/step-j];
+                output[o] += input[k] * filter[(i-N)/step-j];
         }
         for (; j * step <= i; ++j)
-            sum += input[i-(j * step)] * filter[j];
-        while (j < F) {
+            output[o] += input[i-(j * step)] * filter[j];
+        while (j < F){
             size_t k;
             for (k = step - 1 - (i % step); k < N && j < F; k += step, ++j)
-                sum += input[N-1-k] * filter[j];
+                output[o] += input[N-1-k] * filter[j];
         }
-        output[o] = sum;
     }
     for (; i < N + start; ++i, ++o){
-        TYPE sum = 0;
         size_t j = 0;
         while (i-(j * step) >= N){
             size_t k;
             for (k = i % step; k < N && i - (j * step) >= N; k += step, ++j)
-                sum += input[k] * filter[(i-N)/step-j];
+                output[o] += input[k] * filter[(i-N)/step-j];
         }
         for(; j < F; ++j)
-            sum += input[i - (j * step)] * filter[j];
-        output[o] = sum;
+            output[o] += input[i - (j * step)] * filter[j];
     }
     return 0;
 }

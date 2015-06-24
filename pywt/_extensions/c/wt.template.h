@@ -59,15 +59,21 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
                      const Wavelet * const wavelet, const MODE mode);
 
 /* SWT decomposition at given level */
-int CAT(TYPE, _swt_a)(TYPE input[], pywt_index_t input_len,
+int CAT(TYPE, _swt_a)(TYPE input[], size_t input_len,
                       Wavelet* wavelet,
-                      TYPE output[], pywt_index_t output_len,
-                      int level);
+                      TYPE output[], size_t output_len,
+                      unsigned char level);
 
-int CAT(TYPE, _swt_d)(TYPE input[], pywt_index_t input_len,
+int CAT(TYPE, _swt_d)(TYPE input[], size_t input_len,
                       Wavelet* wavelet,
-                      TYPE output[], pywt_index_t output_len,
-                      int level);
+                      TYPE output[], size_t output_len,
+                      unsigned char level);
+
+int CAT(TYPE, _iswt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a_len,
+                     const TYPE * const restrict coeffs_d, const size_t coeffs_d_len,
+                     const Wavelet * const wavelet,
+                     TYPE * const restrict output, const size_t output_len,
+                     const unsigned char level);
 
 #endif /* TYPE */
 #undef restrict
