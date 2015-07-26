@@ -45,22 +45,22 @@ int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restri
         TYPE sum = 0;
         size_t j;
         for (j = 0; j <= i; ++j)
-            sum += filter[j] * input[i-j];
+            sum += filter[j] * input[(i-j)*stride];
         while (j < F){
             size_t k;
             for (k = 0; k < padding && j < F; ++k, ++j)
-                sum += filter[j] * input[N-1];
+                sum += filter[j] * input[(N-1)*stride];
             for (k = 0; k < N && j < F; ++k, ++j)
-                sum += filter[j] * input[N-1-k];
+                sum += filter[j] * input[(N-1-k)*stride];
         }
-        output[o] = sum;
+        output[(o)*stride] = sum;
     }
 
     for(; i < N; i+=step, ++o){
         TYPE sum = 0;
         size_t j;
         for(j = 0; j < F; ++j)
-            sum += input[i-j]*filter[j];
+            sum += input[(i-j)*stride]*filter[j];
         output[o] = sum;
     }
 
@@ -71,20 +71,20 @@ int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restri
         while (i-j >= N){
             size_t k;
             for (k = 0; k < padding && i-j >= N; ++k, ++j)
-                sum += filter[i-N-j] * input[N-1];
+                sum += filter[i-N-j] * input[(N-1)*stride];
             for (k = 0; k < N && i-j >= N; ++k, ++j)
-                sum += filter[i-N-j] * input[k];
+                sum += filter[i-N-j] * input[(k)*stride];
         }
         for (; j <= i; ++j)
-            sum += filter[j] * input[i-j];
+            sum += filter[j] * input[(i-j)*stride];
         while (j < F){
             size_t k;
             for (k = 0; k < padding && j < F; ++k, ++j)
-                sum += filter[j] * input[N-1];
+                sum += filter[j] * input[(N-1)*stride];
             for (k = 0; k < N && j < F; ++k, ++j)
-                sum += filter[j] * input[N-1-k];
+                sum += filter[j] * input[(N-1-k)*stride];
         }
-        output[o] = sum;
+        output[(o)*stride] = sum;
     }
 
     for(; i < N + F/2; i += step, ++o){
@@ -93,13 +93,13 @@ int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restri
         while (i-j >= N){
             size_t k;
             for (k = 0; k < padding && i-j >= N; ++k, ++j)
-                sum += filter[i-N-j] * input[N-1];
+                sum += filter[i-N-j] * input[(N-1)*stride];
             for (k = 0; k < N && i-j >= N; ++k, ++j)
-                sum += filter[i-N-j] * input[k];
+                sum += filter[i-N-j] * input[(k)*stride];
         }
         for (; j < F; ++j)
-            sum += filter[j] * input[i-j];
-        output[o] = sum;
+            sum += filter[j] * input[(i-j)*stride];
+        output[(o)*stride] = sum;
     }
     return 0;
 }
