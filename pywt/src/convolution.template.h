@@ -19,10 +19,13 @@
  * step-th element from the result.
  *
  * input    - input data
- * N        - input data length
+ * N        - input data length,
+ *            in number of elements to be processed
  * filter   - filter data
  * F        - filter data length
  * output   - output data
+ * stride   - stride of input and output,
+ *            in number of elements
  * step     - decimation step
  * mode     - signal extension mode
  */
@@ -31,8 +34,8 @@
 
 int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, const size_t N,
                                          const TYPE * const restrict filter, const size_t F,
-                                         TYPE * const restrict output, const size_t step,
-                                         MODE mode);
+                                         TYPE * const restrict output,
+                                         const size_t stride, const size_t step, MODE mode);
 
 /*
  * Performs normal (full) convolution of "upsampled" input coeffs array with
@@ -45,12 +48,14 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
  * F        - filter data length
  * output   - output data
  * O        - output lenght (currently not used)
+ * stride   - stride of input and output
  * mode     - signal extension mode
  */
 
 int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, const size_t N,
                                             const TYPE * const restrict filter, const size_t F,
-                                            TYPE * const restrict output, const size_t O);
+                                            TYPE * const restrict output, const size_t O,
+                                            const size_t stride);
 
 /* Performs valid convolution (signals must overlap)
  * Extends (virtually) input for MODE_PERIODIZATION.
@@ -59,7 +64,7 @@ int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, c
 int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict input, const size_t N,
                                                 const TYPE * const restrict filter, const size_t F,
                                                 TYPE * const restrict output, const size_t O,
-                                                MODE mode);
+                                                const size_t stride, MODE mode);
 
 /* TODO
  * for SWT

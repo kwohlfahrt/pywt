@@ -30,7 +30,7 @@ int CAT(TYPE, _dec_a)(const TYPE * const restrict input, const size_t input_len,
     return CAT(TYPE, _downsampling_convolution)(input, input_len,
                                                 wavelet->CAT(dec_lo_, TYPE),
                                                 wavelet->dec_len, output,
-                                                2, mode);
+                                                1, 2, mode);
 }
 
 
@@ -48,7 +48,7 @@ int CAT(TYPE, _dec_d)(const TYPE * const restrict input, const size_t input_len,
     return CAT(TYPE, _downsampling_convolution)(input, input_len,
                                                 wavelet->CAT(dec_hi_, TYPE),
                                                 wavelet->dec_len, output,
-                                                2, mode);
+                                                1, 2, mode);
 }
 
 
@@ -65,7 +65,7 @@ int CAT(TYPE, _rec_a)(const TYPE * const restrict coeffs_a, const size_t coeffs_
     return CAT(TYPE, _upsampling_convolution_full)(coeffs_a, coeffs_len,
                                                    wavelet->CAT(rec_lo_, TYPE),
                                                    wavelet->rec_len, output,
-                                                   output_len);
+                                                   output_len, 1);
 }
 
 
@@ -82,7 +82,7 @@ int CAT(TYPE, _rec_d)(const TYPE * const restrict coeffs_d, const size_t coeffs_
     return CAT(TYPE, _upsampling_convolution_full)(coeffs_d, coeffs_len,
                                                    wavelet->CAT(rec_hi_, TYPE),
                                                    wavelet->rec_len, output,
-                                                   output_len);
+                                                   output_len, 1);
 }
 
 /*
@@ -144,9 +144,9 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
     /* reconstruct approximation coeffs with lowpass reconstruction filter */
     if(coeffs_a){
         if(CAT(TYPE, _upsampling_convolution_valid_sf)(coeffs_a, input_len,
-                                                  wavelet->CAT(rec_lo_, TYPE),
-                                                  wavelet->rec_len, output,
-                                                  output_len, mode) < 0){
+                                                       wavelet->CAT(rec_lo_, TYPE),
+                                                       wavelet->rec_len, output,
+                                                       output_len, 1, mode) < 0){
             goto error;
         }
     }
@@ -156,9 +156,9 @@ int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a
      */
     if(coeffs_d){
         if(CAT(TYPE, _upsampling_convolution_valid_sf)(coeffs_d, input_len,
-                                                  wavelet->CAT(rec_hi_, TYPE),
-                                                  wavelet->rec_len, output,
-                                                  output_len, mode) < 0){
+                                                       wavelet->CAT(rec_hi_, TYPE),
+                                                       wavelet->rec_len, output,
+                                                       output_len, 1, mode) < 0){
             goto error;
         }
     }
@@ -201,14 +201,14 @@ int CAT(TYPE, _swt_)(TYPE input[], index_t input_len,
         }
         ret = CAT(TYPE, _downsampling_convolution)(input, input_len, e_filter,
                                                    e_filter_len, output, 1,
-                                                   MODE_PERIODIZATION);
+                                                   1, MODE_PERIODIZATION);
         wtfree(e_filter);
         return ret;
 
     } else {
         return CAT(TYPE, _downsampling_convolution)(input, input_len, filter,
                                                     filter_len, output, 1,
-                                                    MODE_PERIODIZATION);
+                                                    1, MODE_PERIODIZATION);
     }
 }
 

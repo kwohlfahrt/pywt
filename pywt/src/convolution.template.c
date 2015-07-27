@@ -108,7 +108,7 @@ int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restri
 int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, const size_t N,
                                          const TYPE * const restrict filter, const size_t F,
                                          TYPE * const restrict output,
-                                         const size_t step, MODE mode)
+                                         const size_t stride, const size_t step, MODE mode)
 {
     /* This convolution performs efficient downsampling by computing every
      * step'th element of normal convolution (currently tested only for step=1
@@ -118,7 +118,8 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
     size_t i = step - 1, o = 0;
 
     if(mode == MODE_PERIODIZATION)
-        return CAT(TYPE, _downsampling_convolution_periodization)(input, N, filter, F, output, 1, step);
+        return CAT(TYPE, _downsampling_convolution_periodization)(input, N, filter, F,
+                                                                  output, stride, step);
 
     if (mode == MODE_SMOOTH && N < 2)
         mode = MODE_CONSTANT_EDGE;
@@ -127,16 +128,16 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
         TYPE sum = 0;
         size_t j;
         for(j = 0; j <= i; ++j)
-            sum += filter[j]*input[i-j];
+            sum += filter[j]*input[(i-j)*stride];
 
         switch(mode) {
         case MODE_SYMMETRIC:
             while (j < F){
                 size_t k;
                 for(k = 0; k < N && j < F; ++j, ++k)
-                    sum += filter[j]*input[k];
+                    sum += filter[j]*input[k*stride];
                 for(k = 0; k < N && j < F; ++k, ++j)
-                    sum += filter[j] * input[N-1-k];
+                    sum += filter[j] * input[(N-1-k)*stride];
             }
             break;
         case MODE_CONSTANT_EDGE:
@@ -146,28 +147,28 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
         case MODE_SMOOTH:{
             size_t k;
             for(k = 1; j < F; ++j, ++k)
-                sum += filter[j]*(input[0] + k * (input[0] - input[1]));
+                sum += filter[j]*(input[0] + k * (input[0] - input[1*stride]));
             break;
         }
         case MODE_PERIODIC:
             while (j < F){
                 size_t k;
                 for(k = 0; k < N && j < F; ++k, ++j)
-                    sum += filter[j]*input[N-1-k];
+                    sum += filter[j]*input[(N-1-k)*stride];
             }
             break;
         case MODE_ZEROPAD:
         default:
             break;
         }
-        output[o] = sum;
+        output[o*stride] = sum;
     }
 
     for(; i < N; i+=step, ++o){
         TYPE sum = 0;
         size_t j;
         for(j = 0; j < F; ++j)
-            sum += input[i-j]*filter[j];
+            sum += input[(i-j)*stride]*filter[j];
         output[o] = sum;
     }
 
@@ -184,26 +185,27 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
             while (i - j >= N){
                 size_t k;
                 for(k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[N-1-k];
+                    sum += filter[i-N-j]*input[(N-1-k)*stride];
                 for(k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[k];
+                    sum += filter[i-N-j]*input[k*stride];
             }
             break;
         case MODE_CONSTANT_EDGE:
             for(; i-j >= N; ++j)
-                sum += filter[j]*input[N-1];
+                sum += filter[j]*input[(N-1)*stride];
             break;
         case MODE_SMOOTH:{
             size_t k;
             for(k = i - N + 1; i-j >= N; ++j, --k)
-                sum += filter[j]*(input[N-1] + k * (input[N-1] - input[N-2]));
+                sum += filter[j]*(input[(N-1)*stride]
+                                  + k * (input[(N-1)*stride] - input[(N-2)*stride]));
             break;
         }
         case MODE_PERIODIC:
             while (i-j >= N){
                 size_t k;
                 for (k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[k];
+                    sum += filter[i-N-j]*input[k*stride];
             }
             break;
         case MODE_ZEROPAD:
@@ -213,16 +215,16 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
         }
 
         for(; j <= i; ++j)
-            sum += filter[j]*input[i-j];
+            sum += filter[j]*input[(i-j)*stride];
 
         switch(mode) {
         case MODE_SYMMETRIC:
             while (j < F){
                 size_t k;
                 for(k = 0; k < N && j < F; ++j, ++k)
-                    sum += filter[j]*input[k];
+                    sum += filter[j]*input[k*stride];
                 for(k = 0; k < N && j < F; ++k, ++j)
-                    sum += filter[j] * input[N-1-k];
+                    sum += filter[j] * input[(N-1-k)*stride];
             }
             break;
         case MODE_CONSTANT_EDGE:
@@ -232,21 +234,21 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
         case MODE_SMOOTH:{
             size_t k;
             for(k = 1; j < F; ++j, ++k)
-                sum += filter[j]*(input[0] + k * (input[0] - input[1]));
+                sum += filter[j]*(input[0] + k * (input[0] - input[1*stride]));
             break;
         }
         case MODE_PERIODIC:
             while (j < F){
                 size_t k;
                 for(k = 0; k < N && j < F; ++k, ++j)
-                    sum += filter[j]*input[N-1-k];
+                    sum += filter[j]*input[(N-1-k)*stride];
             }
             break;
         case MODE_ZEROPAD:
         default:
             break;
         }
-        output[o] = sum;
+        output[o*stride] = sum;
     }
 
     for(; i < N+F-1; i += step, ++o){
@@ -258,26 +260,27 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
             while (i - j >= N){
                 size_t k;
                 for(k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[N-1-k];
+                    sum += filter[i-N-j]*input[(N-1-k)*stride];
                 for(k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[k];
+                    sum += filter[i-N-j]*input[k*stride];
             }
             break;
         case MODE_CONSTANT_EDGE:
             for(; i-j >= N; ++j)
-                sum += filter[j]*input[N-1];
+                sum += filter[j]*input[(N-1)*stride];
             break;
         case MODE_SMOOTH:{
             size_t k;
             for(k = i - N + 1; i-j >= N; ++j, --k)
-                sum += filter[j]*(input[N-1] + k * (input[N-1] - input[N-2]));
+                sum += filter[j]*(input[(N-1)*stride]
+                                  + k * (input[(N-1)*stride] - input[(N-2)*stride]));
             break;
         }
         case MODE_PERIODIC:
             while (i-j >= N){
                 size_t k;
                 for (k = 0; k < N && i-j >= N; ++j, ++k)
-                    sum += filter[i-N-j]*input[k];
+                    sum += filter[i-N-j]*input[k*stride];
             }
             break;
         case MODE_ZEROPAD:
@@ -286,15 +289,16 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
             break;
         }
         for(; j < F; ++j)
-            sum += filter[j]*input[i-j];
-        output[o] = sum;
+            sum += filter[j]*input[(i-j)*stride];
+        output[o*stride] = sum;
     }
     return 0;
 }
 
 int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, const size_t N,
                                             const TYPE * const restrict filter, const size_t F,
-                                            TYPE * const restrict output, const size_t O)
+                                            TYPE * const restrict output, const size_t O,
+                                            const size_t stride)
 {
     /* Performs a zero-padded convolution, using each input element for two
      * consecutive filter elements. This simulates an upsampled input.
@@ -315,32 +319,32 @@ int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, c
     for(; i < N && i < F/2; ++i, o += 2){
         size_t j;
         for(j = 0; j <= i; ++j){
-            output[o] += filter[j*2] * input[i-j];
-            output[o+1] += filter[j*2+1] * input[i-j];
+            output[o*stride] += filter[j*2] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[j*2+1] * input[(i-j)*stride];
         }
     }
 
     for(; i < N; ++i, o += 2){
         size_t j;
         for(j = 0; j < F/2; ++j){
-            output[o] += filter[j*2] * input[i-j];
-            output[o+1] += filter[j*2+1] * input[i-j];
+            output[o*stride] += filter[j*2] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[j*2+1] * input[(i-j)*stride];
         }
     }
 
     for(; i < F/2; ++i, o += 2){
         size_t j;
         for(j = i-(N-1); j <= i; ++j){
-            output[o] += filter[j*2] * input[i-j];
-            output[o+1] += filter[j*2+1] * input[i-j];
+            output[o*stride] += filter[j*2] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[j*2+1] * input[(i-j)*stride];
         }
     }
 
     for(; i < N+F/2; ++i, o += 2){
         size_t j;
         for(j = i-(N-1); j < F/2; ++j){
-            output[o] += filter[j*2] * input[i-j];
-            output[o+1] += filter[j*2+1] * input[i-j];
+            output[o*stride] += filter[j*2] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[j*2+1] * input[(i-j)*stride];
         }
     }
     return 0;
@@ -349,7 +353,8 @@ int CAT(TYPE, _upsampling_convolution_full)(const TYPE * const restrict input, c
 
 int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const restrict input, const size_t N,
                                                               const TYPE * const restrict filter, const size_t F,
-                                                              TYPE * const restrict output, const size_t O)
+                                                              TYPE * const restrict output, const size_t O,
+                                                              const size_t stride)
 {
     // TODO? Allow for non-2 step
 
@@ -368,19 +373,19 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
         while(j <= start-1){
             size_t k;
             for (k = 0; k < N && j <= start-1; ++k, ++j){
-                output[2*N-1] += filter[2*(start-1-j)] * input[k];
-                output[0] += filter[2*(start-1-j)+1] * input[k];
+                output[(2*N-1)*stride] += filter[2*(start-1-j)] * input[k*stride];
+                output[0] += filter[2*(start-1-j)+1] * input[k*stride];
             }
         }
         for (; j <= N+start-1 && j < F/2; ++j){
-            output[2*N-1] += filter[2*j] * input[N+start-1-j];
-            output[0] += filter[2*j+1] * input[N+start-1-j];
+            output[(2*N-1)*stride] += filter[2*j] * input[(N+start-1-j)*stride];
+            output[0] += filter[2*j+1] * input[(N+start-1-j)*stride];
         }
         while (j < F / 2){
             size_t k;
             for (k = 0; k < N && j < F/2; ++k, ++j){
-                output[2*N-1] += filter[2*j] * input[N-1-k];
-                output[0] += filter[2*j+1] * input[N-1-k];
+                output[(2*N-1)*stride] += filter[2*j] * input[(N-1-k)*stride];
+                output[0] += filter[2*j+1] * input[(N-1-k)*stride];
             }
         }
 
@@ -390,14 +395,14 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
     for (; i < F/2 && i < N; ++i, o += 2){
         size_t j = 0;
         for(; j <= i; ++j){
-            output[o] += filter[2*j] * input[i-j];
-            output[o+1] += filter[2*j+1] * input[i-j];
+            output[o*stride] += filter[2*j] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[2*j+1] * input[(i-j)*stride];
         }
         while (j < F/2){
             size_t k;
             for(k = 0; k < N && j < F/2; ++k, ++j){
-                output[o] += filter[2*j] * input[N-1-k];
-                output[o+1] += filter[2*j+1] * input[N-1-k];
+                output[o*stride] += filter[2*j] * input[(N-1-k)*stride];
+                output[(o+1)*stride] += filter[2*j+1] * input[(N-1-k)*stride];
             }
         }
     }
@@ -405,8 +410,8 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
     for (; i < N; ++i, o += 2){
         size_t j;
         for(j = 0; j < F/2; ++j){
-            output[o] += filter[2*j] * input[i-j];
-            output[o+1] += filter[2*j+1] * input[i-j];
+            output[o*stride] += filter[2*j] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[2*j+1] * input[(i-j)*stride];
         }
     }
 
@@ -415,19 +420,19 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
         while(i-j >= N){
             size_t k;
             for (k = 0; k < N && i-j >= N; ++k, ++j){
-                output[o] += filter[2*(i-N-j)] * input[k];
-                output[o+1] += filter[2*(i-N-j)+1] * input[k];
+                output[o*stride] += filter[2*(i-N-j)] * input[(k)*stride];
+                output[(o+1)*stride] += filter[2*(i-N-j)+1] * input[(k)*stride];
             }
         }
         for (; j <= i && j < F/2; ++j){
-            output[o] += filter[2*j] * input[i-j];
-            output[o+1] += filter[2*j+1] * input[i-j];
+            output[o*stride] += filter[2*j] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[2*j+1] * input[(i-j)*stride];
         }
         while (j < F / 2){
             size_t k;
             for (k = 0; k < N && j < F/2; ++k, ++j){
-                output[o] += filter[2*j] * input[N-1-k];
-                output[o+1] += filter[2*j+1] * input[N-1-k];
+                output[o*stride] += filter[2*j] * input[(N-1-k)*stride];
+                output[(o+1)*stride] += filter[2*j+1] * input[(N-1-k)*stride];
             }
         }
     }
@@ -437,13 +442,13 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
         while(i-j >= N){
             size_t k;
             for (k = 0; k < N && i-j >= N; ++k, ++j){
-                output[o] += filter[2*(i-N-j)] * input[k];
-                output[o+1] += filter[2*(i-N-j)+1] * input[k];
+                output[o*stride] += filter[2*(i-N-j)] * input[(k)*stride];
+                output[(o+1)*stride] += filter[2*(i-N-j)+1] * input[(k)*stride];
             }
         }
         for (; j <= i && j < F/2; ++j){
-            output[o] += filter[2*j] * input[i-j];
-            output[o+1] += filter[2*j+1] * input[i-j];
+            output[o*stride] += filter[2*j] * input[(i-j)*stride];
+            output[(o+1)*stride] += filter[2*j+1] * input[(i-j)*stride];
         }
     }
 
@@ -462,12 +467,13 @@ int CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(const TYPE * const
 int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict input, const size_t N,
                                                 const TYPE * const restrict filter, const size_t F,
                                                 TYPE * const restrict output, const size_t O,
-                                                MODE mode)
+                                                const size_t stride, MODE mode)
 {
     // TODO: Allow non-2 step?
 
     if(mode == MODE_PERIODIZATION)
-        return CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(input, N, filter, F, output, O);
+        return CAT(TYPE, _upsampling_convolution_valid_sf_periodization)(input, N, filter, F,
+                                                                         output, O, stride);
 
     if((F%2) || (N < F/2))
         return -1;
@@ -480,11 +486,11 @@ int CAT(TYPE, _upsampling_convolution_valid_sf)(const TYPE * const restrict inpu
             TYPE sum_odd = 0;
             size_t j;
             for(j = 0; j < F/2; ++j){
-                sum_even += filter[j*2] * input[i-j];
-                sum_odd += filter[j*2+1] * input[i-j];
+                sum_even += filter[j*2] * input[(i-j)*stride];
+                sum_odd += filter[j*2+1] * input[(i-j)*stride];
             }
-            output[o] += sum_even;
-            output[o+1] += sum_odd;
+            output[o*stride] += sum_even;
+            output[(o+1)*stride] += sum_odd;
         }
     }
     return 0;
