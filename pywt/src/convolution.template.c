@@ -35,7 +35,8 @@
 
 int CAT(TYPE, _downsampling_convolution_periodization)(const TYPE * const restrict input, const size_t N,
                                                        const TYPE * const restrict filter, const size_t F,
-                                                       TYPE * const restrict output, const size_t step)
+                                                       TYPE * const restrict output,
+                                                       const size_t stride, const size_t step)
 {
     size_t i = F/2, o = 0;
     const size_t padding = N % 2; // FIXME: Should be N%step for larger steps?
@@ -117,7 +118,7 @@ int CAT(TYPE, _downsampling_convolution)(const TYPE * const restrict input, cons
     size_t i = step - 1, o = 0;
 
     if(mode == MODE_PERIODIZATION)
-        return CAT(TYPE, _downsampling_convolution_periodization)(input, N, filter, F, output, step);
+        return CAT(TYPE, _downsampling_convolution_periodization)(input, N, filter, F, output, 1, step);
 
     if (mode == MODE_SMOOTH && N < 2)
         mode = MODE_CONSTANT_EDGE;
