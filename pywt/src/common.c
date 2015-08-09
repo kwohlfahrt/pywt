@@ -45,6 +45,22 @@ size_t dwt_buffer_length(size_t input_len, size_t filter_len, MODE mode){
     }
 }
 
+size_t dwt_buffer_length_o(size_t input_len, size_t filter_len,
+                           Coefficient coef, MODE mode){
+    size_t len, adj;
+    if(input_len < 1 || filter_len < 1)
+        return 0;
+
+    adj = ((input_len % 2) && coef == COEF_APPROX) ? 1 : 0;
+
+    switch(mode){
+    case MODE_PERIODIZATION:
+        return input_len / 2 + adj;
+    default:
+        return (input_len + filter_len - 1) / 2 - 1 + adj;
+    }
+}
+
 size_t reconstruction_buffer_length(size_t coeffs_len, size_t filter_len){
     if(coeffs_len < 1 || filter_len < 1)
         return 0;
@@ -58,6 +74,34 @@ size_t idwt_buffer_length(size_t coeffs_len, size_t filter_len, MODE mode){
                 return 2*coeffs_len;
             default:
                 return 2*coeffs_len-filter_len+2;
+    }
+}
+
+size_t idwt_buffer_length_o(size_t coefs_a_len, size_t coefs_d_len,
+                            size_t filter_len, MODE mode){
+    size_t coefs_len, adj;
+
+    if (coefs_a_len == 0 && coefs_d_len == 0){
+        return 0;
+    } else if (coefs_a_len == 0) {
+        adj = 0;
+        coefs_len = coefs_d_len;
+    } else if (coefs_d_len == 0) {
+        adj = 0;
+        coefs_len = coefs_a_len;
+    } else {
+        adj = coefs_a_len - coefs_d_len;
+        coefs_len = coefs_d_len;
+        if (adj > 1)
+            return 0;
+    }
+
+    switch (mode){
+    case MODE_PERIODIZATION:
+        return 2 * coefs_len + adj;
+    default:
+        return (coefs_len + adj) * 2 - filter_len + 1;
+        //return 2 * coefs_len - filter_len + adj;
     }
 }
 

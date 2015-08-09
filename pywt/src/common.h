@@ -77,6 +77,9 @@ typedef enum {
  */
 size_t dwt_buffer_length(size_t input_len, size_t filter_len, MODE mode);
 
+size_t dwt_buffer_length_o(size_t input_len, size_t filter_len,
+                           Coefficient coef, MODE mode);
+
 /*
  * Length of reconstructed signal for specified input coeffs length and filter
  * length. It is used for direct reconstruction from coefficients (normal
@@ -89,6 +92,9 @@ size_t reconstruction_buffer_length(size_t coeffs_len, size_t filter_len);
  * length and extension mode.
  */
 size_t idwt_buffer_length(size_t coeffs_len, size_t filter_len, MODE mode);
+
+size_t idwt_buffer_length_o(size_t coefs_a_len, size_t coefs_d_len,
+                            size_t filter_len, MODE mode);
 
 /* Length of SWT coefficients for specified input signal length (== input_len) */
 size_t swt_buffer_length(size_t input_len);

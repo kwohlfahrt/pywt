@@ -25,12 +25,23 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
                               const Wavelet * const restrict wavelet, const size_t axis,
                               const Coefficient detail, const MODE mode);
 
+int CAT(TYPE, _downcoef)(const TYPE * const restrict input, const size_t input_len,
+                        const Wavelet * const restrict wavelet,
+                        TYPE * const restrict output, const size_t output_len,
+                        const Coefficient coef, const MODE mode);
+
 // a_info and d_info are pointers, as they may be NULL
 int CAT(TYPE, _idwt_axis)(const TYPE * const restrict coefs_a, const ArrayInfo * a_info,
                           const TYPE * const restrict coefs_d, const ArrayInfo * d_info,
                           TYPE * const restrict output, const ArrayInfo output_info,
                           const Wavelet * const restrict wavelet,
                           const size_t axis, const MODE mode);
+
+/* Single level IDWT reconstruction */
+int CAT(TYPE, _idwt)(const TYPE * const restrict coefs_a, const size_t coefs_a_len,
+                     const TYPE * const restrict coefs_d, const size_t coefs_d_len,
+                     TYPE * const restrict output, const size_t output_len,
+                     const Wavelet * const wavelet, const MODE mode);
 
 /* Single level decomposition */
 int CAT(TYPE, _dec_a)(const TYPE * const restrict input, const size_t input_len,
@@ -51,13 +62,6 @@ int CAT(TYPE, _rec_a)(const TYPE * const restrict coeffs_a, const size_t coeffs_
 int CAT(TYPE, _rec_d)(const TYPE * const restrict coeffs_d, const size_t coeffs_len,
                       const Wavelet * const restrict wavelet,
                       TYPE * const restrict output, const size_t output_len);
-
-/* Single level IDWT reconstruction */
-int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a_len,
-                     const TYPE * const restrict coeffs_d, const size_t coeffs_d_len,
-                     const Wavelet * const wavelet,
-                     TYPE * const restrict output, const size_t output_len,
-                     const MODE mode, const int fix_size_diff);
 
 /* SWT decomposition at given level */
 int CAT(TYPE, _swt_a)(TYPE input[], index_t input_len,

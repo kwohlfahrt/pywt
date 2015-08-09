@@ -35,8 +35,10 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
 
     for (i = 0; i < input_info.ndim; ++i){
         if (i == axis){
-            if (dwt_buffer_length(input_info.shape[i], wavelet->dec_len, mode)
-                != output_info.shape[i])
+            size_t output_len = dwt_buffer_length_o(input_info.shape[i],
+                                                    wavelet->dec_len,
+                                                    coef, mode);
+            if ((output_len == 0) || (output_len != output_info.shape[i]))
                 return 1;
         } else {
             if (input_info.shape[i] != output_info.shape[i])
@@ -95,12 +97,16 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
         // Apply along axis
         switch (coef){
         case COEF_APPROX:
-            CAT(TYPE, _dec_a)(input_row, input_info.shape[axis], wavelet,
-                              output_row, output_info.shape[axis], mode);
+            CAT(TYPE, _downsampling_convolution)
+                (input_row, input_info.shape[axis],
+                 wavelet->CAT(dec_lo_, TYPE), wavelet->dec_len,
+                 output_row, 2, mode);
             break;
         case COEF_DETAIL:
-            CAT(TYPE, _dec_d)(input_row, input_info.shape[axis], wavelet,
-                              output_row, output_info.shape[axis], mode);
+            CAT(TYPE, _downsampling_convolution)
+                (input_row, input_info.shape[axis],
+                 wavelet->CAT(dec_hi_, TYPE), wavelet->dec_len,
+                 output_row, 2, mode);
             break;
         }
 
@@ -120,6 +126,30 @@ int CAT(TYPE, _downcoef_axis)(const TYPE * const restrict input, const ArrayInfo
     free(temp_input);
     free(temp_output);
     return 2;
+}
+
+
+int CAT(TYPE, _downcoef)(const TYPE * const restrict input, const size_t input_len,
+                         const Wavelet * const restrict wavelet,
+                         TYPE * const restrict output, const size_t output_len,
+                         const Coefficient coef, const MODE mode){
+    const TYPE * filter;
+
+    if (output_len != dwt_buffer_length_o(input_len, wavelet->dec_len,
+                                          coef, mode))
+        return -1;
+
+    switch (coef){
+    case COEF_APPROX:
+        filter = wavelet->CAT(dec_lo_, TYPE);
+        break;
+    case COEF_DETAIL:
+        filter = wavelet->CAT(dec_hi_, TYPE);
+    }
+
+    return CAT(TYPE, _downsampling_convolution)(input, input_len,
+                                                filter, wavelet->dec_len,
+                                                output, 2, mode);
 }
 
 
@@ -149,17 +179,11 @@ int CAT(TYPE, _idwt_axis)(const TYPE * const restrict coefs_a, const ArrayInfo *
 
     for (i = 0; i < output_info.ndim; ++i){
         if (i == axis){
-            size_t input_shape;
-            if (have_a && have_d &&
-                (d_info->shape[i] != a_info->shape[i]))
-                return 1;
-            input_shape = have_a ? a_info->shape[i] : d_info->shape[i];
-
-            /* TODO: reconstruction_buffer_length should take a & d shapes
-             *       - for odd output_len, d_len == (a_len - 1)
-             */
-            if (idwt_buffer_length(input_shape, wavelet->rec_len, mode)
-                != output_info.shape[i])
+            size_t a_len = (have_a) ? a_info->shape[i] : 0;
+            size_t d_len = (have_d) ? d_info->shape[i] : 0;
+            size_t output_shape = idwt_buffer_length_o(a_len, d_len,
+                                                       wavelet->rec_len, mode);
+            if ((output_shape == 0) || (output_shape != output_info.shape[i]))
                 return 1;
         } else {
             if ((have_a && (a_info->shape[i] != output_info.shape[i])) ||
@@ -270,6 +294,52 @@ int CAT(TYPE, _idwt_axis)(const TYPE * const restrict coefs_a, const ArrayInfo *
 }
 
 
+/*
+ * IDWT reconstruction from approximation and detail coeffs
+ *
+ * If fix_size_diff is 1 then coeffs arrays can differ by one in length (this
+ * is useful in multilevel decompositions and reconstructions of odd-length
+ * signals).  Requires zero-filled output buffer.
+ */
+int CAT(TYPE, _idwt)(const TYPE * const restrict coefs_a, const size_t coefs_a_len,
+                     const TYPE * const restrict coefs_d, const size_t coefs_d_len,
+                     TYPE * const restrict output, const size_t output_len,
+                     const Wavelet * const restrict wavelet, const MODE mode){
+    size_t rec_len = idwt_buffer_length_o(coefs_a_len, coefs_d_len,
+                                          wavelet->rec_len, mode);
+    /* check output size */
+    if((rec_len == 0) || (output_len != rec_len))
+        return 0;
+
+    memset(output, 0, output_len * sizeof(TYPE));
+
+    /* reconstruct approximation coeffs with lowpass reconstruction filter */
+    if(coefs_a){
+        if(CAT(TYPE, _upsampling_convolution_valid_sf)(coefs_a, coefs_a_len,
+                                                       wavelet->CAT(rec_lo_, TYPE),
+                                                       wavelet->rec_len, output,
+                                                       output_len, mode) < 0){
+            return -1;
+        }
+    }
+    /*
+     * Add reconstruction of details coefs performed with highpass
+     * reconstruction filter.
+     */
+    if(coefs_d){
+        if(CAT(TYPE, _upsampling_convolution_valid_sf)(coefs_d, coefs_d_len,
+                                                       wavelet->CAT(rec_hi_, TYPE),
+                                                       wavelet->rec_len, output,
+                                                       output_len, mode) < 0){
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+// TODO: Refactor to make more similar to `downcoef_axis`?
 int CAT(TYPE, _dec_a)(const TYPE * const restrict input, const size_t input_len,
                       const Wavelet * const restrict wavelet,
                       TYPE * const restrict output, const size_t output_len,
@@ -338,90 +408,6 @@ int CAT(TYPE, _rec_d)(const TYPE * const restrict coeffs_d, const size_t coeffs_
                                                    output_len);
 }
 
-
-/*
- * IDWT reconstruction from approximation and detail coeffs
- *
- * If fix_size_diff is 1 then coeffs arrays can differ by one in length (this
- * is useful in multilevel decompositions and reconstructions of odd-length
- * signals).  Requires zero-filled output buffer.
- */
-int CAT(TYPE, _idwt)(const TYPE * const restrict coeffs_a, const size_t coeffs_a_len,
-                     const TYPE * const restrict coeffs_d, const size_t coeffs_d_len,
-                     const Wavelet * const restrict wavelet,
-                     TYPE * const restrict output, const size_t output_len,
-                     const MODE mode, const int fix_size_diff){
-
-    size_t input_len;
-
-    /*
-     * If one of coeffs array is NULL then the reconstruction will be performed
-     * using the other one
-     */
-
-    if(coeffs_a != NULL && coeffs_d != NULL){
-
-        if(fix_size_diff){
-            if( (coeffs_a_len > coeffs_d_len ? coeffs_a_len - coeffs_d_len
-                                             : coeffs_d_len-coeffs_a_len) > 1){ /* abs(a-b) */
-                goto error;
-            }
-
-            input_len = coeffs_a_len>coeffs_d_len ? coeffs_d_len
-                                                  : coeffs_a_len; /* min */
-        } else {
-            if(coeffs_a_len != coeffs_d_len)
-                goto error;
-
-            input_len = coeffs_a_len;
-        }
-
-    } else if(coeffs_a != NULL){
-        input_len  = coeffs_a_len;
-
-    } else if (coeffs_d != NULL){
-        input_len = coeffs_d_len;
-
-    } else {
-        goto error;
-    }
-
-    /* check output size */
-    if(output_len != idwt_buffer_length(input_len, wavelet->rec_len, mode))
-        goto error;
-
-    /*
-     * Set output to zero (this can be omitted if output array is already
-     * cleared) memset(output, 0, output_len * sizeof(TYPE));
-     */
-
-    /* reconstruct approximation coeffs with lowpass reconstruction filter */
-    if(coeffs_a){
-        if(CAT(TYPE, _upsampling_convolution_valid_sf)(coeffs_a, input_len,
-                                                  wavelet->CAT(rec_lo_, TYPE),
-                                                  wavelet->rec_len, output,
-                                                  output_len, mode) < 0){
-            goto error;
-        }
-    }
-    /*
-     * Add reconstruction of details coeffs performed with highpass
-     * reconstruction filter.
-     */
-    if(coeffs_d){
-        if(CAT(TYPE, _upsampling_convolution_valid_sf)(coeffs_d, input_len,
-                                                  wavelet->CAT(rec_hi_, TYPE),
-                                                  wavelet->rec_len, output,
-                                                  output_len, mode) < 0){
-            goto error;
-        }
-    }
-
-    return 0;
-
-    error:
-        return -1;
-}
 
 /* basic SWT step (TODO: optimize) */
 int CAT(TYPE, _swt_)(TYPE input[], index_t input_len,
