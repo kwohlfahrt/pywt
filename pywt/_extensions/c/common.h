@@ -66,6 +66,7 @@ typedef enum {
        MODE_SMOOTH,        /* linear extrapolation (first derivative) */
        MODE_PERIODIC,      /* signal is treated as being periodic */
        MODE_PERIODIZATION, /* signal is treated as being periodic, minimal output length */
+       MODE_NONE,          /* only complete overlap is computed */
        MODE_MAX,
 } MODE;
 

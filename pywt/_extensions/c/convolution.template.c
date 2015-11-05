@@ -494,6 +494,7 @@ int CAT(TYPE, _upsampled_filter_convolution)(const TYPE * const restrict input, 
                                              TYPE * const restrict output,
                                              const size_t step, const size_t shift)
 {
+    // TODO: See if it is possible to implement a unified convolution for up/downsampling and different steps.
     size_t const start = F * step / 2 - shift;
     size_t i = start, o = 0;
 
