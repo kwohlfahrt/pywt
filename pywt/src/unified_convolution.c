@@ -8,38 +8,6 @@ double timediff(struct timespec const start, struct timespec const end){
     return ((double) (end.tv_sec - start.tv_sec)) + ((double) (end.tv_nsec - start.tv_nsec) * 1e-9);
 }
 
-// Minimal implementation (no edge handling) for reference
-void downsampling_convolution(const float * const input, const size_t N, const size_t i_step,
-                              const float * const filter, const size_t F,
-                              float * const output, const size_t O){
-    size_t i_start = F + i_step - 1; // Only correct for i_step = 2
-    size_t o_start = i_start / 2;
-
-    for (size_t i = 0; (i * i_step) + i_start < N; i += 1)
-        for (size_t f = 0; f < F ; f += 1)
-            output[i + o_start] += input[i_start + (i * i_step) - f] * filter[f];
-}
-
-void upsampling_convolution(const float * const input, const size_t N,
-                            const float * const filter, const size_t F,
-                            float * const output, const size_t O, const size_t o_step){
-    size_t i_start = F / 2 - 1;
-
-    for (size_t i = 0; i + i_start < N; i += 1)
-        for (size_t f = 0; f < F; f += 1)
-            output[i * o_step + f % o_step] += filter[f] * input[i + i_start - f / o_step];
-}
-
-void upsampled_filter_convolution(const float * const input, const size_t N,
-                                  const float * const filter, const size_t F, const size_t f_step,
-                                  float * const output, const size_t O){
-    size_t i_start = F * f_step;
-
-    for (size_t i = 0; i + i_start < N; i += 1)
-        for (size_t f = 0; f < F; f += 1)
-            output[i + i_start / 2] += input[i + i_start - (f * f_step)] * filter[f];
-}
-
 static inline size_t ceil_div(size_t numerator, size_t denominator){
     return numerator / denominator + (numerator % denominator != 0);
 }
@@ -168,7 +136,6 @@ int main(void){
     printArray(filter, F);
 
     const size_t O = 30;
-    float * const output_ref = malloc(O * sizeof(*output_ref));
     float * const output_new = malloc(O * sizeof(*output_new));
 
     const size_t repeats = 1000000;
@@ -177,77 +144,42 @@ int main(void){
 
     clock_gettime(CLOCK_REALTIME, &start);
     for (size_t i = 0; i < repeats; i++)
-        float_downsampling_convolution(input, I, filter, F, output_ref,
-                                       output_downsample, MODE_PERIODIC);
-    clock_gettime(CLOCK_REALTIME, &end);
-    printf("Output original downsampling convolution (%5.2f s):\n",
-           timediff(start, end));
-    memset(output_ref, 0, O * sizeof(*output_ref));
-    float_downsampling_convolution(input, I, filter, F, output_ref,
-                                   output_downsample, MODE_PERIODIC);
-    printArray(output_ref, O);
-
-    clock_gettime(CLOCK_REALTIME, &start);
-    for (size_t i = 0; i < repeats; i++)
         unified_convolution(input, I, filter, F, output_new, O,
                             1, output_downsample, 1, MODE_PERIODIC);
     clock_gettime(CLOCK_REALTIME, &end);
-    printf("Output unified downsampling convolution (%5.2f s):\n",
+    printf("Downsampling convolution (%5.2f s):\n",
            timediff(start, end));
-    memset(output_new, 0, O * sizeof(*output_ref));
+    memset(output_new, 0, O * sizeof(*output_new));
     unified_convolution(input, I, filter, F, output_new, O,
                         1, output_downsample, 1, MODE_PERIODIC);
     printArray(output_new, O);
 
     clock_gettime(CLOCK_REALTIME, &start);
     for (size_t i = 0; i < repeats; i++)
-        float_upsampling_convolution_valid_sf(input, I, filter, F, output_ref, O, MODE_PERIODIC);
-    clock_gettime(CLOCK_REALTIME, &end);
-    memset(output_ref, 0, O * sizeof(*output_ref));
-    float_upsampling_convolution_full(input, I, filter, F, output_ref, O);
-    printf("Output original upsampling convolution (%5.2f s):\n",
-           timediff(start, end));
-    printArray(output_ref, O);
-
-    clock_gettime(CLOCK_REALTIME, &start);
-    for (size_t i = 0; i < repeats; i++)
         unified_convolution(input, I, filter, F, output_new, O,
                             filter_upsample, 1, 1, MODE_PERIODIC);
     clock_gettime(CLOCK_REALTIME, &end);
-    memset(output_new, 0, O * sizeof(*output_ref));
+    memset(output_new, 0, O * sizeof(*output_new));
     unified_convolution(input, I, filter, F, output_new, O,
                         filter_upsample, 1, 1, MODE_PERIODIC);
-    printf("Output unified upsampling convolution (%5.2f s):\n",
+    printf("Upsampling convolution (%5.2f s):\n",
            timediff(start, end));
     printArray(output_new, O);
-
-    clock_gettime(CLOCK_REALTIME, &start);
-    for (size_t i = 0; i < repeats; i++)
-        float_upsampled_filter_convolution(input, I, filter, F, output_ref,
-                                           filter_upsample, 0);
-    clock_gettime(CLOCK_REALTIME, &end);
-    printf("Output original upsampled filter convolution (%5.2f s):\n",
-           timediff(start, end));
-    memset(output_ref, 0, O * sizeof(*output_ref));
-    float_upsampled_filter_convolution(input, I, filter, F, output_ref,
-                                       filter_upsample, 0);
-    printArray(output_ref, O);
 
     clock_gettime(CLOCK_REALTIME, &start);
     for (size_t i = 0; i < repeats; i++)
         unified_convolution(input, I, filter, F, output_new, O,
                             1, 1, filter_upsample, MODE_PERIODIC);
     clock_gettime(CLOCK_REALTIME, &end);
-    printf("Output unified upsampled filter convolution (%5.2f s):\n",
+    printf("Upsampled filter convolution (%5.2f s):\n",
            timediff(start, end));
-    memset(output_new, 0, O * sizeof(*output_ref));
+    memset(output_new, 0, O * sizeof(*output_new));
     unified_convolution(input, I, filter, F, output_new, O,
                         1, 1, filter_upsample, MODE_PERIODIC);
     printArray(output_new, O);
 
     free(input);
     free(filter);
-    free(output_ref);
     free(output_new);
 
     return 0;
