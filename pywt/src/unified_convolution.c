@@ -20,9 +20,10 @@ static inline void unified_convolution(const float * const input, const size_t I
                                        const size_t filter_upsampling,
                                        const MODE edge_extension){
 #define INPUT_IDX ((o * output_downsampling / input_upsampling) + input_start)
+    // CONTINUE HERE: Initial filter idx is not correct for combined input/output upsampling
 #define FILTER_IDX (f * input_upsampling + o % input_upsampling)
 
-    const size_t input_start = ((output_downsampling - 1));
+    const size_t input_start = ((output_downsampling - 1) / input_upsampling);
 
     size_t o;
     for (o = 0; INPUT_IDX < F * filter_upsampling / input_upsampling
@@ -138,10 +139,11 @@ int main(void){
     const size_t O = 40;
     float * const output_new = malloc(O * sizeof(*output_new));
 
-    const size_t repeats = 1000000;
+    const size_t repeats = 0;
     struct timespec start, end;
     size_t const output_downsample = 3, input_upsample = 3, filter_upsample = 3;
 
+    /*
     clock_gettime(CLOCK_REALTIME, &start);
     for (size_t i = 0; i < repeats; i++)
         unified_convolution(input, I, filter, F, output_new, O,
@@ -176,6 +178,13 @@ int main(void){
     memset(output_new, 0, O * sizeof(*output_new));
     unified_convolution(input, I, filter, F, output_new, O,
                         1, 1, filter_upsample, MODE_PERIODIC);
+    printArray(output_new, O);
+    */
+
+    puts("Custom test (zpd):");
+    memset(output_new, 0, O * sizeof(*output_new));
+    unified_convolution(input, I, filter, F, output_new, O,
+                        2, 2, 1, MODE_ZEROPAD);
     printArray(output_new, O);
 
     free(input);

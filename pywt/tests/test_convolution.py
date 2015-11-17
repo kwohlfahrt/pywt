@@ -47,7 +47,7 @@ def downsample(a, step):
     return a[step-1::step]
 
 def upsample(a, step):
-    r = numpy.zeros(len(a) * step)
+    r = numpy.zeros(len(a) * step, dtype=a.dtype)
     r[::step] = a
     return r
 
@@ -58,8 +58,10 @@ def unified_convolution(input, filter,
     padding = (len(filter) - 1, len(filter) - input_upsampling)
 
     input = edge_extend(input, padding, input_upsampling, mode)
+    print(list(input))
+    print(list(filter)[::-1])
     convolved = numpy.convolve(input, filter, mode='valid')
-
+    print(list(convolved))
     return downsample(convolved, output_downsampling)
 
 def printArray(a):
@@ -67,6 +69,11 @@ def printArray(a):
 
 i = numpy.arange(12) + 1
 f = numpy.arange(6) + 1
-printArray(unified_convolution(i, f, output_downsampling=3, mode='periodic'))
-printArray(unified_convolution(i, f, input_upsampling=3, mode='periodic'))
-printArray(unified_convolution(i, f, filter_upsampling=3, mode='periodic'))
+#print("Downsampling convolution:")
+#printArray(unified_convolution(i, f, output_downsampling=3, mode='periodic'))
+#print("Upsampling convolution")
+#printArray(unified_convolution(i, f, input_upsampling=3, mode='periodic'))
+#print("Upsampled filter convolution")
+#printArray(unified_convolution(i, f, filter_upsampling=3, mode='periodic'))
+print("Custom test (zpd)")
+print(list(unified_convolution(i, f, 2, 2, 1, mode='zero-pad')))
