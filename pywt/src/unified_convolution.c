@@ -34,12 +34,12 @@ static inline void unified_convolution(const float * const input, const size_t I
         case MODE_SYMMETRIC:{
             size_t f = INPUT_IDX / filter_upsampling + 1;
             while (FILTER_IDX < F){
-                for (size_t k = (INPUT_IDX + 1) % filter_upsampling;
+                for (size_t k = filter_upsampling - 1 - INPUT_IDX % filter_upsampling;
                      k < I && FILTER_IDX < F; ++f, k += filter_upsampling)
-                    output[o] += input[k] * filter[f];
-                for (size_t k = (INPUT_IDX + 1) % filter_upsampling;
+                    output[o] += input[k] * filter[FILTER_IDX];
+                for (size_t k = filter_upsampling - 1 - INPUT_IDX % filter_upsampling;
                      k < I && FILTER_IDX < F; ++f, k += filter_upsampling)
-                    output[o] += input[I-1-k] * filter[f];
+                    output[o] += input[I-1-k] * filter[FILTER_IDX];
             }
             break;
         }
@@ -54,7 +54,7 @@ static inline void unified_convolution(const float * const input, const size_t I
         case MODE_PERIODIC:{
             size_t f = INPUT_IDX / filter_upsampling + 1;
             while (FILTER_IDX < F)
-                for (size_t k = (INPUT_IDX + 1) % filter_upsampling;
+                for (size_t k = filter_upsampling - 1 - INPUT_IDX % filter_upsampling;
                      k < I && FILTER_IDX < F; f++, k += filter_upsampling){
                     output[o] += input[I-1-k] * filter[FILTER_IDX];
                 }
@@ -135,12 +135,12 @@ int main(void){
     puts("Filter:");
     printArray(filter, F);
 
-    const size_t O = 30;
+    const size_t O = 40;
     float * const output_new = malloc(O * sizeof(*output_new));
 
     const size_t repeats = 1000000;
     struct timespec start, end;
-    size_t const output_downsample = 2, input_upsample = 2, filter_upsample = 2;
+    size_t const output_downsample = 3, input_upsample = 3, filter_upsample = 3;
 
     clock_gettime(CLOCK_REALTIME, &start);
     for (size_t i = 0; i < repeats; i++)

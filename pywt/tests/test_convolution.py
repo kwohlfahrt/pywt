@@ -67,6 +67,6 @@ def printArray(a):
 
 i = numpy.arange(12) + 1
 f = numpy.arange(6) + 1
-printArray(unified_convolution(i, f, output_downsampling=2, mode='zero-pad'))
-printArray(unified_convolution(i, f, input_upsampling=2, mode='zero-pad'))
-printArray(unified_convolution(i, f, filter_upsampling=2, mode='periodic'))
+printArray(unified_convolution(i, f, output_downsampling=3, mode='periodic'))
+printArray(unified_convolution(i, f, input_upsampling=3, mode='periodic'))
+printArray(unified_convolution(i, f, filter_upsampling=3, mode='periodic'))
