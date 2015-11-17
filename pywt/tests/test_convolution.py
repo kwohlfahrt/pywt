@@ -14,7 +14,8 @@ def edge_extend(a, n, upsampling, mode='zero-pad'):
     if mode == 'zero-pad':
         pass
     elif mode == 'periodic':
-        reverse_enumerate = chain.from_iterable(repeat(reversed(range(len(a)))))
+        reverse_enumerate = reversed(range(len(a)))
+        reverse_enumerate = chain.from_iterable(repeat(list(reverse_enumerate)))
         for i, j in zip(reverse_enumerate, reversed(start_extend)):
             r[j] = a[i]
         forward_enumerate = chain.from_iterable(repeat(range(len(a))))
@@ -30,11 +31,11 @@ def edge_extend(a, n, upsampling, mode='zero-pad'):
             r[j] = a[-1] + i * (a[-1] - a[-2])
     elif mode == 'symmetric':
         reverse_enumerate = chain(range(len(a)), reversed(range(len(a))))
-        reverse_enumerate = chain.from_iterable(repeat(reverse_enumerate))
+        reverse_enumerate = chain.from_iterable(repeat(list(reverse_enumerate)))
         for i, j in zip(reverse_enumerate, reversed(start_extend)):
             r[j] = a[i]
         forward_enumerate = chain(reversed(range(len(a))), range(len(a)))
-        forward_enumerate = chain.from_iterable(repeat(forward_enumerate))
+        forward_enumerate = chain.from_iterable(repeat(list(forward_enumerate)))
         for i, j in zip(forward_enumerate, end_extend):
             r[j] = a[i]
     else:
