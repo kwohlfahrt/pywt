@@ -6,18 +6,20 @@ notation vX.X.X in the commands below would be replaced by the actual release
 number.
 
 
-updating the release notes
+Updating the release notes
 --------------------------
 Prior to the release, make sure the release notes are up to date.
 
-author lists can be generated via:
+author lists can be generated via (where vP.P.P is the previous release
+number)::
 
-```python  ./util/authors.py vP.P.P..```
-(where vP.P.P is the previous release number)
+  $ python  ./util/authors.py vP.P.P..
 
-and the lists of Issues closed and PRs merged via:
+and the lists of Issues closed and PRs merged via::
 
-```python ./util/gh_lists.py vX.X.X```  (script requires Python 2.X to run)
+  $ python ./util/gh_lists.py vX.X.X
+
+.. note:: This script requires Python 2.X to run
 
 
 Tag the release and trigger the build of Windows wheels
@@ -32,9 +34,9 @@ interface.  These should be downloaded so that they can later be uploaded to
 pypi.python.org.
 
 
-Tag the release via:
+Tag the release via::
 
-```git tag -s vX.X.X```
+  $ git tag -s vX.X.X
 
 Then push the vX.X.X tag to master.
 
@@ -43,19 +45,21 @@ Create the source distribution
 ------------------------------
 
 Remove untracked files and directories via git clean.
-**Warning:**  This will delete files & directories that are not under version
-control so you may want to do a dry run first by adding -n, so you can see what
-will be removed:
 
-```git clean -xfdn```
+.. warning::
+   This will delete files & directories that are not under version control so
+   you may want to do a dry run first by adding ``--dry-run`` or ``-n``, so you
+   can see what will be removed::
 
-Then run without -n:
+     $ git clean -xdn
 
-```git clean -xfd```
+To clean untracked files, run with ``--force``, or ``-f``::
 
-Create the source distribution files via:
+  $ git clean -xdf
 
-```python setup.py sdist --formats=gztar,zip```
+Create the source distribution files via::
+
+  $ python setup.py sdist --formats=gztar,zip
 
 
 Upload the release to pypi
@@ -65,9 +69,9 @@ The binary Windows wheels downloaded from Appveyor (see above) should
 also be placed into the /dist subfolder along with the sdist archives.
 
 The wheels and source distributions created above can all be securely uploaded
-to pypi.python.org using twine:
+to pypi.python.org using twine::
 
-```twine upload -s dist/*```
+  $ twine upload -s dist/*
 
 
 Upload the documentation to pypi
@@ -101,8 +105,6 @@ Prepare for continued development
 
 Increment the version number in setup.py and change ISRELEASED to False.
 
-Prepare new release note files for theupcoming release:
+Prepare new release note files for theupcoming release::
 
-```
-git add doc/source/releasenotes/X.X.X-notes.rst
-```
+  $ git add doc/source/releasenotes/X.X.X-notes.rst
