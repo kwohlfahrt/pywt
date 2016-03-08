@@ -3,21 +3,28 @@
 Testing
 =======
 
-Continous integration with Travis-CI
-------------------------------------
+Continous integration
+---------------------
 
-The project is using `Travis-CI <https://travis-ci.org/PyWavelets/pywt>`_ service
-for continous integration and testing.
+The project is using `Travis-CI <https://travis-ci.org/PyWavelets/pywt>`_ and
+`AppVeyor <https://ci.appveyor.com>`_ for continous integration and testing on
+Linux and Windows respectively.
 
 Current build status is:
 
 .. image::
-    https://secure.travis-ci.org/PyWavelets/pywt.png?branch=master
-    :alt: Build Status
-    :target: https://secure.travis-ci.org/PyWavelets/pywt
+   https://travis-ci.org/PyWavelets/pywt.png?branch=master
+   :alt: Travis-CI Build Status
+   :target: https://travis-ci.org/PyWavelets/pywt
+
+.. image::
+   https://ci.appveyor.com/api/projects/status/wwlm4dxx9aum6qvd/branch/master?svg=true
+   :alt: AppVeyor Build Status
+   :target: https://ci.appveyor.com/project/PyWavelets/pywt/history
 
 If you are submitting a patch or pull request please make sure it
-does not break the build.
+does not break the build. The status will be shown on any pull requests
+submitted via `Github <https://github.com/PyWavelets/pywt/pulls>`_.
 
 
 Running tests locally
