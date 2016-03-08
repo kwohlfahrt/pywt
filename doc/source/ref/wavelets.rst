@@ -17,9 +17,6 @@ Built-in wavelets - ``wavelist()``
 
 .. autofunction:: wavelist
 
-  Custom user wavelets are also supported through the :class:`Wavelet` object
-  constructor as described below.
-
 
 ``Wavelet`` object
 ------------------

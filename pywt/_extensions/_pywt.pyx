@@ -164,7 +164,7 @@ def wavelist(family=None):
     """
     wavelist(family=None)
 
-    Returns list of available wavelet names for the given family name.
+    Returns list of built-in wavelet names for the given family name.
 
     Parameters
     ----------
@@ -183,7 +183,6 @@ def wavelist(family=None):
     >>> import pywt
     >>> pywt.wavelist('coif')
     ['coif1', 'coif2', 'coif3', 'coif4', 'coif5']
-
     """
     cdef object wavelets, sorting_list
     sorting_list = []  # for natural sorting order

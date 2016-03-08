@@ -52,7 +52,7 @@ def dwt_coeff_len(data_len, filter_len, mode):
     ----------
     data_len : int
         Data length.
-    filter_len : int
+    filter_len : int or Wavelet object
         Filter length.
     mode : str, optional (default: 'symmetric')
         Signal extension mode, see Modes
@@ -180,7 +180,24 @@ def idwt(cA, cD, wavelet, mode='symmetric', axis=-1):
     rec: array_like
         Single level reconstruction of signal from given coefficients.
 
+    Examples
+    --------
+    >>> import pywt
+    >>> (cA, cD) = pywt.dwt([1,2,3,4,5,6], 'db2', 'smooth')
+    >>> print pywt.idwt(cA, cD, 'db2', 'smooth')
+    array([ 1.,  2.,  3.,  4.,  5.,  6.])
+
+    One of the useful features is that ``cA`` or ``cD`` can be set to ``None``.
+    This is treated as though that coefficient was an array of zeros.
+
+    >>> import pywt
+    >>> (cA, cD) = pywt.dwt([1,2,3,4,5,6], 'db2', 'smooth')
+    >>> A = pywt.idwt(cA, None, 'db2', 'smooth')
+    >>> D = pywt.idwt(None, cD, 'db2', 'smooth')
+    >>> print A + D
+    array([ 1.,  2.,  3.,  4.,  5.,  6.])
     """
+
     # TODO: Lots of possible allocations to eliminate (zeros_like, asarray(rec))
     # accept array_like input; make a copy to ensure a contiguous array
 
