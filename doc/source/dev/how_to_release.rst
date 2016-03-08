@@ -104,10 +104,5 @@ Increment the version number in setup.py and change ISRELEASED to False.
 Prepare new release note files for theupcoming release:
 
 ```
-git add doc/release/X.X.X-notes.rst
-git add doc/source/release.X.X.X.rst
+git add doc/source/releasenotes/X.X.X-notes.rst
 ```
-
-And add release.X.X.X to the list in:
-
-``` doc/source/releasenotes.rst ```
