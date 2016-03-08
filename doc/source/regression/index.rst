@@ -13,7 +13,6 @@ examples illustrating how to use and how not to use PyWavelets.
    :maxdepth: 1
 
    wavelet
-   modes
    dwt-idwt
    multilevel
    wp
