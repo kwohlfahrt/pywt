@@ -109,13 +109,18 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    ref/index
    regression/index
    dev/index
    resources
-   contents
+   releasenotes
+
+Indices and tables
+++++++++++++++++++
+* :ref:`genindex`
+* :ref:`search`
 
 
 .. _built-in wavelet filters: http://wavelets.pybytes.com/
