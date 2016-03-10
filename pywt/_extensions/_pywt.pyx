@@ -41,26 +41,41 @@ class _Modes(object):
 
     Depending on the extrapolation method, significant artifacts at the
     signal's borders can be introduced during that process, which in turn may
-    lead to inaccurate computations of the :ref:`DWT <ref-dwt>` at the signal's
-    ends.
+    lead to inaccurate computations of the DWT at the signal's ends.
 
     PyWavelets provides several methods of signal extrapolation that can be
     used to minimize this negative effect:
 
-    zero - zero-padding                   0  0 | x1 x2 ... xn | 0  0
-    constant - constant-padding              x1 x1 | x1 x2 ... xn | xn xn
-    symmetric - symmetric-padding             x2 x1 | x1 x2 ... xn | xn xn-1
-    reflect - reflect-padding             x3 x2 | x1 x2 ... xn | xn-1 xn-2
-    periodic - periodic-padding            xn-1 xn | x1 x2 ... xn | x1 x2
-    smooth - smooth-padding               (1st derivative interpolation)
+    - Zero-padding (``Modes.zero``)::
+
+        ... 0  0 | x1 x2 ... xn | 0  0 ...
+
+    - Constant-padding (``Modes.constant``)::
+
+        ... x1 x1 | x1 x2 ... xn | xn xn ...
+
+    - Symmetric-padding (``Modes.symmetric``)::
+
+        ... x2 x1 | x1 x2 ... xn | xn xn-1 ...
+
+    - Reflect-padding (``Modes.reflect``)::
+
+        ... x2 x1 | x1 x2 ... xn | xn-1 xn-2 ...
+
+    - Periodic-padding (``Modes.periodic``)::
+
+        ... xn-1 xn | x1 x2 ... xn | x1 x2 ...
+
+    - 1st-derivative extrapolation (``Modes.smooth``)
 
     DWT performed for these extension modes is slightly redundant, but ensure a
     perfect reconstruction for IDWT. To receive the smallest possible number of
     coefficients, computations can be performed with the periodization mode:
 
-    periodization - like periodic-padding but gives the smallest possible
-                    number of decomposition coefficients. IDWT must be
-                    performed with the same mode.
+    - Periodization (``Modes.periodization``):
+
+      Like periodic-padding but gives the smallest possible number of
+      decomposition coefficients. IDWT must be performed with the same mode.
 
     Examples
     --------
@@ -78,8 +93,9 @@ class _Modes(object):
     the extra values only when they are needed.  This feature saves extra
     memory and CPU resources and helps to avoid page swapping when handling
     relatively big data arrays on computers with low physical memory.
-
     """
+
+    # I can't make attribute docstrings work with Cython
     zero = common.MODE_ZEROPAD
     constant = common.MODE_CONSTANT_EDGE
     symmetric = common.MODE_SYMMETRIC
@@ -115,7 +131,6 @@ class _Modes(object):
 
 
 Modes = _Modes()
-
 
 class _DeprecatedMODES(_Modes):
     msg = ("MODES has been renamed to Modes and will be "

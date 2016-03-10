@@ -39,7 +39,7 @@ More Examples
 
 Now let's experiment with the :func:`dwt` some more. For example let's pass a
 :class:`Wavelet` object instead of the wavelet name and specify signal
-extension mode (the default is :ref:`symmetric <Modes.symmetric>`) for the
+extension :ref:`Mode <Modes>` (the default is ``symmetric``) for the
 border effect handling:
 
     >>> w = pywt.Wavelet('sym3')
@@ -79,10 +79,10 @@ extension mode (please refer to the PyWavelets' documentation for the
     >>> [int(pywt.dwt_coeff_len(len(x), w.dec_len, mode)) for mode in pywt.Modes.modes]
     [6, 6, 6, 6, 6, 4]
 
-As you see in the above example, the :ref:`periodization <Modes.periodization>`
-(periodization) mode is slightly different from the others. It's aim when
-doing the :func:`DWT <dwt>` transform is to output coefficients arrays that
-are half of the length of the input data.
+As you see in the above example, the periodizaion :ref:`Mode <Modes>` mode is
+slightly different from the others. It's aim when doing the :func:`DWT <dwt>`
+transform is to output coefficients arrays that are half of the length of the
+input data.
 
 Knowing that, you should never mix the periodization mode with other modes when
 doing :func:`DWT <dwt>` and :func:`IDWT <idwt>`. Otherwise, it will produce
@@ -142,8 +142,8 @@ must have the same size.
 Not every coefficient array can be used in :func:`IDWT <idwt>`. In the
 following example the :func:`idwt` will fail because the input arrays are
 invalid - they couldn't be created as a result of :func:`DWT <dwt>`, because
-the minimal output length for dwt using ``db4`` wavelet and the :ref:`symmetric
-<Modes.symmetric>` mode is ``4``, not ``3``:
+the minimal output length for dwt using ``db4`` wavelet and the symmettric
+:ref:`Mode <Modes>` mode is ``4``, not ``3``:
 
     >>> pywt.idwt([1,2,4], [4,1,3], 'db4', 'symmetric')
     Traceback (most recent call last):
