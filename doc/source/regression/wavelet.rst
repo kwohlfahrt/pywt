@@ -138,7 +138,8 @@ Other Wavelet's properties are:
         3
 
 Now when we know a bit about the builtin Wavelets, let's see how to create
-:ref:`custom Wavelets <custom-wavelets>` objects. These can be done in two ways:
+:ref:`custom Wavelets <using-custom-wavelets>` objects. These can be done in two
+ways:
 
     1) Passing the filter bank object that implements the `filter_bank`
        attribute. The attribute must return four filters coefficients.

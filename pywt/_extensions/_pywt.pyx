@@ -246,17 +246,40 @@ def families(int short=True):
 
 cdef public class Wavelet [type WaveletType, object WaveletObject]:
     """
-    Wavelet(name, filter_bank=None) object describe properties of
-    a wavelet identified by name.
+    Wavelet(name, filter_bank=None)
 
-    In order to use a built-in wavelet the parameter name must be
-    a valid name from the wavelist() list.
-    To create a custom wavelet object, filter_bank parameter must
-    be specified. It can be either a list of four filters or an object
-    that a `filter_bank` attribute which returns a list of four
-    filters - just like the Wavelet instance itself.
+    Describes the properties of a wavelet identified by name.
 
+    Parameters
+    ----------
+    name : str, optional
+        The name for the wavelet. If it is one of the built-in names, the
+        ``filter_bank`` parameter is optional
+
+    filter_bank : 4-tuple of array_like or object with ``filter_bank`` attribute
+        This parameter must be provided in the same format as the corresponding
+        attribute. An object defining the ``filter_bank`` attribute (e.g. an
+        instance of this class) may also be used.
+
+    Examples
+    --------
+
+    >>> import pywt
+    >>> w = pywt.Wavelet('db1')
+    >>> print(w)
+    Wavelet db1
+      Family name:    Daubechies
+      Short name:     db
+      Filters length: 2
+      Orthogonal:     True
+      Biorthogonal:   True
+      Symmetry:       asymmetric
+    >>> print(wavelet.dec_lo, wavelet.dec_hi)
+    [0.70710678118655, 0.70710678118655] [-0.70710678118655, 0.70710678118655]
+    >>> print(wavelet.rec_lo, wavelet.rec_hi)
+    [0.70710678118655, 0.70710678118655] [0.70710678118655, -0.70710678118655]
     """
+
     #cdef readonly properties
     def __cinit__(self, name=u"", object filter_bank=None):
         cdef object family_code, family_number
@@ -399,7 +422,10 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
             self.w.biorthogonal = (value != 0)
 
     property symmetry:
-        "Wavelet symmetry"
+        """Wavelet symmetry.
+
+        May be ``asymmetric``, ``near symmetric`` or ``symmetric``
+        """
         def __get__(self):
             if self.w.symmetry == wavelet.ASYMMETRIC:
                 return "asymmetric"
@@ -423,8 +449,10 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
                 return self.w.vanishing_moments_phi
 
     property filter_bank:
-        """Returns tuple of wavelet filters coefficients
-        (dec_lo, dec_hi, rec_lo, rec_hi)
+        """Returns tuple of wavelet filters coefficients, in the following
+        order::
+
+          (dec_lo, dec_hi, rec_lo, rec_hi)
         """
         def __get__(self):
             return (self.dec_lo, self.dec_hi, self.rec_lo, self.rec_hi)
@@ -435,8 +463,9 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         return self.filter_bank
 
     property inverse_filter_bank:
-        """Tuple of inverse wavelet filters coefficients
-        (rec_lo[::-1], rec_hi[::-1], dec_lo[::-1], dec_hi[::-1])
+        """Tuple of inverse wavelet filters coefficients::
+
+          (rec_lo[::-1], rec_hi[::-1], dec_lo[::-1], dec_hi[::-1])
         """
         def __get__(self):
             return (self.rec_lo[::-1], self.rec_hi[::-1], self.dec_lo[::-1],
@@ -464,7 +493,7 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         -------
         [phi, psi, x] : array_like
             For orthogonal wavelets returns scaling function, wavelet function
-            and xgrid - [phi, psi, x].
+            and xgrid
 
         [phi_d, psi_d, phi_r, psi_r, x] : array_like
             For biorthogonal wavelets returns scaling and wavelet function both
@@ -479,6 +508,12 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         >>> # Biorthogonal
         >>> wavelet = pywt.Wavelet('bior3.5')
         >>> phi_d, psi_d, phi_r, psi_r, x = wavelet.wavefun(level=5)
+
+        Notes
+        -----
+        You can find live examples of ``wavefun`` usage and images
+        of all the built-in wavelets on the
+        `Wavelet Properties Browser <http://wavelets.pybytes.com>`_ page.
 
         """
         cdef pywt_index_t filter_length "filter_length"
