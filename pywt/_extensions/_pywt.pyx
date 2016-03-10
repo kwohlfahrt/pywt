@@ -467,7 +467,9 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         """Returns tuple of wavelet filters coefficients, in the following
         order::
 
-          (dec_lo, dec_hi, rec_lo, rec_hi)
+        >>> w = Wavelet('bior1.3')
+        >>> w.filter_bank == (w.dec_lo, w.dec_hi, w.rec_lo, w.rec_hi)
+        True
         """
         def __get__(self):
             return (self.dec_lo, self.dec_hi, self.rec_lo, self.rec_hi)
@@ -480,7 +482,10 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
     property inverse_filter_bank:
         """Tuple of inverse wavelet filters coefficients::
 
-          (rec_lo[::-1], rec_hi[::-1], dec_lo[::-1], dec_hi[::-1])
+        >>> w = Wavelet('bior1.3')
+        >>> w.inverse_filter_bank == (w.rec_lo[::-1], w.rec_hi[::-1],
+                                      w.dec_lo[::-1], w.dec_hi[::-1])
+        True
         """
         def __get__(self):
             return (self.rec_lo[::-1], self.rec_hi[::-1], self.dec_lo[::-1],
@@ -523,13 +528,6 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         >>> # Biorthogonal
         >>> wavelet = pywt.Wavelet('bior3.5')
         >>> phi_d, psi_d, phi_r, psi_r, x = wavelet.wavefun(level=5)
-
-        Notes
-        -----
-        You can find live examples of ``wavefun`` usage and images
-        of all the built-in wavelets on the
-        `Wavelet Properties Browser <http://wavelets.pybytes.com>`_ page.
-
         """
         cdef pywt_index_t filter_length "filter_length"
         cdef pywt_index_t right_extent_length "right_extent_length"

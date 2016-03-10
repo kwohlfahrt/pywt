@@ -5,25 +5,27 @@
 The Wavelet object
 ==================
 
-Wavelet families and builtin Wavelets names
--------------------------------------------
+:class:`Wavelet` objects are carriers of a :attr:`filter bank
+<Wavelet.filter_bank>`, along with associated metadata.
 
-:class:`Wavelet` objects are really a handy carriers of a bunch of DWT-specific
-data like *quadrature mirror filters* and some general properties associated
-with them.
+.. _built-in wavelets:
 
-At first let's go through the methods of creating a :class:`Wavelet` object.
-The easiest and the most convenient way is to use builtin named Wavelets.
+Built-in Wavelets
+-----------------
 
-These wavelets are organized into groups called wavelet families. The most
-commonly used families are:
+The most convenient way of getting a wavelet is to use one of the builtin named
+Wavelets.
 
-    >>> import pywt
+    >>> w = pywt.Wavelet('coif4')
+
+These wavelets are organized into groups called wavelet families. The built-in
+families are:
+
     >>> pywt.families()
     ['haar', 'db', 'sym', 'coif', 'bior', 'rbio', 'dmey']
 
-The :func:`wavelist` function with family name passed as an argument is used to
-obtain the list of wavelet names in each family.
+The :func:`wavelist` function is used to obtain the list of wavelet names in
+each family.
 
     >>> for family in pywt.families():
     ...     print("%s family: " % family + ', '.join(pywt.wavelist(family)))
@@ -42,25 +44,15 @@ with no argument. As you can see currently there are 76 builtin wavelets.
     76
 
 
-Creating Wavelet objects
-------------------------
-
-Now when we know all the names let's finally create a :class:`Wavelet` object:
-
-    >>> w = pywt.Wavelet('db3')
-
-So.. that's it.
-
-
 Wavelet properties
 ------------------
 
 But what can we do with :class:`Wavelet` objects? Well, they carry some
 interesting information.
 
-First, let's try printing a :class:`Wavelet` object. This shows a brief
-information about its name, its family name and some properties like
-orthogonality and symmetry.
+Printing a :class:`Wavelet` object shows brief information about its name, its
+family name and some properties. Details of the properties can be found in the
+API reference for the :class:`Wavelet` class.
 
     >>> print(w)
     Wavelet db3
@@ -72,78 +64,43 @@ orthogonality and symmetry.
       Symmetry:       asymmetric
 
 But the most important information are the wavelet filters coefficients, which
-are used in :ref:`Discrete Wavelet Transform <ref-dwt>`. These coefficients can
-be obtained via the :attr:`~Wavelet.dec_lo`, :attr:`Wavelet.dec_hi`,
-:attr:`~Wavelet.rec_lo` and :attr:`~Wavelet.rec_hi` attributes, which
-corresponds to lowpass and highpass decomposition filters and lowpass and
-highpass reconstruction filters respectively:
+are used in the various wavelet transforms. These coefficients can be obtained
+via the :attr:`Wavelet.dec_lo`, :attr:`Wavelet.dec_hi`, :attr:`Wavelet.rec_lo`
+and :attr:`Wavelet.rec_hi` attributes.
 
-    >>> def print_array(arr):
-    ...     print("[%s]" % ", ".join(["%.14f" % x for x in arr]))
-
-    >>> print_array(w.dec_lo)
+    >>> print(w.dec_lo)
     [0.03522629188210, -0.08544127388224, -0.13501102001039, 0.45987750211933, 0.80689150931334, 0.33267055295096]
-    >>> print_array(w.dec_hi)
+    >>> print(w.dec_hi)
     [-0.33267055295096, 0.80689150931334, -0.45987750211933, -0.13501102001039, 0.08544127388224, 0.03522629188210]
-    >>> print_array(w.rec_lo)
+    >>> print(w.rec_lo)
     [0.33267055295096, 0.80689150931334, 0.45987750211933, -0.13501102001039, -0.08544127388224, 0.03522629188210]
-    >>> print_array(w.rec_hi)
+    >>> print(w.rec_hi)
     [0.03522629188210, 0.08544127388224, -0.13501102001039, -0.45987750211933, 0.80689150931334, -0.33267055295096]
 
-Another way to get the filters data is to use the :attr:`~Wavelet.filter_bank`
-attribute, which returns all four filters in a tuple:
+Another way to get the filters data is to use the :attr:`Wavelet.filter_bank`
+attribute, which returns all four filters in a tuple.
 
-    >>> w.filter_bank == (w.dec_lo, w.dec_hi, w.rec_lo, w.rec_hi)
-    True
+Custom Wavelets
+---------------
 
+If the wavelet you want to use is not part of the built-in set, you can specify
+a custom wavelet from a filter bank. This can be done in two ways:
 
-Other Wavelet's properties are:
+    1) Passing the filters coefficients directly as the ``filter_bank``
+       parameter. They must be specified in the following order:
 
-    Wavelet :attr:`~Wavelet.name`, :attr:`~Wavelet.short_family_name` and :attr:`~Wavelet.family_name`:
+       1) :attr:`Wavelet.dec_lo`
+       2) :attr:`Wavelet.dec_hi`
+       3) :attr:`Wavelet.rec_lo`
+       4) :attr:`Wavelet.rec_hi`
 
-        >>> print(w.name)
-        db3
-        >>> print(w.short_family_name)
-        db
-        >>> print(w.family_name)
-        Daubechies
+       >>> from math import sqrt
+       >>> my_filter_bank = ([sqrt(2)/2, sqrt(2)/2], [-sqrt(2)/2, sqrt(2)/2],
+       ...                   [sqrt(2)/2, sqrt(2)/2], [sqrt(2)/2, -sqrt(2)/2])
+       >>> my_wavelet = pywt.Wavelet('My Haar Wavelet', filter_bank=my_filter_bank)
 
-    - Decomposition (:attr:`~Wavelet.dec_len`) and reconstruction
-      (:attr:`~.Wavelet.rec_len`) filter lengths:
-
-        >>> int(w.dec_len) # int() is for normalizing longs and ints for doctest
-        6
-        >>> int(w.rec_len)
-        6
-
-    - Orthogonality (:attr:`~Wavelet.orthogonal`) and biorthogonality (:attr:`~Wavelet.biorthogonal`):
-
-        >>> w.orthogonal
-        True
-        >>> w.biorthogonal
-        True
-
-    - Symmetry (:attr:`~Wavelet.symmetry`):
-
-        >>> print(w.symmetry)
-        asymmetric
-
-    - Number of vanishing moments for the scaling function *phi*
-      (:attr:`~Wavelet.vanishing_moments_phi`) and the wavelet function *psi*
-      (:attr:`~Wavelet.vanishing_moments_psi`) associated with the filters:
-
-        >>> w.vanishing_moments_phi
-        0
-        >>> w.vanishing_moments_psi
-        3
-
-Now when we know a bit about the builtin Wavelets, let's see how to create
-:ref:`custom Wavelets <using-custom-wavelets>` objects. These can be done in two
-ways:
-
-    1) Passing the filter bank object that implements the `filter_bank`
-       attribute. The attribute must return four filters coefficients.
-
+    2) Passing the filter bank object that implements the ``filter_bank``
+       attribute. The attribute must return four filter coefficient arrays.
 
        >>> class MyHaarFilterBank(object):
        ...     @property
@@ -154,15 +111,6 @@ ways:
 
 
        >>> my_wavelet = pywt.Wavelet('My Haar Wavelet', filter_bank=MyHaarFilterBank())
-
-
-    2) Passing the filters coefficients directly as the *filter_bank* parameter.
-
-        >>> from math import sqrt
-        >>> my_filter_bank = ([sqrt(2)/2, sqrt(2)/2], [-sqrt(2)/2, sqrt(2)/2],
-        ...                   [sqrt(2)/2, sqrt(2)/2], [sqrt(2)/2, -sqrt(2)/2])
-        >>> my_wavelet = pywt.Wavelet('My Haar Wavelet', filter_bank=my_filter_bank)
-
 
 Note that such custom wavelets **will not** have all the properties set
 to correct values:
@@ -191,20 +139,23 @@ to correct values:
       Symmetry:       unknown
 
 
-And now... the `wavefun`!
--------------------------
+Wavelet Functions
+-----------------
 
-We all know that the fun with wavelets is in wavelet functions.
-Now what would be this package without a tool to compute wavelet
-and scaling functions approximations?
+So far, the wavelet has been discussed as a filter bank, containing four
+filters, becuase this is how ``pywt`` works internally. However, it can also
+be described as the convolution with a wavelet and scaling function.
 
-This is the purpose of the :meth:`~Wavelet.wavefun` method, which is used to
-approximate scaling function (*phi*) and wavelet function (*psi*) at the given
-level of refinement, based on the filters coefficients.
+Many common wavelets do no have a closed form solution for the corresponding
+wavelet and scaling functions, but can only be represented as a filter bank.
+However, the wavelet and scaling functions can be approximated using the
+`cascade algorithm <https://en.wikipedia.org/wiki/Cascade_algorithm>`_ - this is
+the purpose of the :meth:`Wavelet.wavefun` method.
 
 The number of returned values varies depending on the wavelet's
 orthogonality property. For orthogonal wavelets the result is tuple
-with scaling function, wavelet function and xgrid coordinates.
+with scaling function (``phi``), wavelet function (``psi``) and xgrid
+coordinates.
 
     >>> w = pywt.Wavelet('sym3')
     >>> w.orthogonal
@@ -222,6 +173,6 @@ and the xgrid.
     False
     >>> (phi_d, psi_d, phi_r, psi_r, x) = w.wavefun(level=5)
 
-.. seealso:: You can find live examples of :meth:`~Wavelet.wavefun` usage and
-             images of all the built-in wavelets on the
-             `Wavelet Properties Browser <http://wavelets.pybytes.com>`_ page.
+.. seealso:: You can find live examples of :meth:`Wavelet.wavefun` usage and
+             images of all the built-in wavelets on the `Wavelet Properties
+             Browser <http://wavelets.pybytes.com>`_ page.
