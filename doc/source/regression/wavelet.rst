@@ -173,6 +173,28 @@ and the xgrid.
     False
     >>> (phi_d, psi_d, phi_r, psi_r, x) = w.wavefun(level=5)
 
+For visual inspection, the functions can be plotted as follows:
+
+    >>> def plotWavelet(wavelet, level=5):
+    ...     from matplotlib import pyplot as plt
+    ...
+    ...     labels = ["Scaling function (φ)", "Wavelet function (ψ)",
+    ...               "Reconstruction Scaling Function (φ)",
+    ...               "Reconstruction Wavelet Function (ψ)"]
+    ...     colors = ("b", "r", "b", "r")
+    ...
+    ...     data = wavelet.wavefun(level)
+    ...     funcs, x = data[:-1], data[-1]
+    ...     fig = plt.figure()
+    ...     for i, (func, label, color) in enumerate(zip(funcs, labels, colors):
+    ...         ax = fig.add_subplot(len(functions) // 2, 2, 1 + i)
+    ...         ax.plot(x, func, color)
+    ...         as.set_title(label)
+
+    >>> plotWavelet(pywt.Wavelet('sym3'))
+    >>> plotWavelet(pywt.Wavelet('bior1.3'))
+    >>> plt.show() # doctest: +SKIP
+
 .. seealso:: You can find live examples of :meth:`Wavelet.wavefun` usage and
              images of all the built-in wavelets on the `Wavelet Properties
              Browser <http://wavelets.pybytes.com>`_ page.
