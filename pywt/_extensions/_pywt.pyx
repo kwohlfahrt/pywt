@@ -465,7 +465,7 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
 
     property filter_bank:
         """Returns tuple of wavelet filters coefficients, in the following
-        order::
+        order:
 
         >>> w = Wavelet('bior1.3')
         >>> w.filter_bank == (w.dec_lo, w.dec_hi, w.rec_lo, w.rec_hi)
@@ -480,7 +480,7 @@ cdef public class Wavelet [type WaveletType, object WaveletObject]:
         return self.filter_bank
 
     property inverse_filter_bank:
-        """Tuple of inverse wavelet filters coefficients::
+        """Tuple of inverse wavelet filters coefficients:
 
         >>> w = Wavelet('bior1.3')
         >>> w.inverse_filter_bank == (w.rec_lo[::-1], w.rec_hi[::-1],
