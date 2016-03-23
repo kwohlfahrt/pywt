@@ -64,13 +64,17 @@ def dwt_coeff_len(data_len, filter_len, mode):
 
     Notes
     -----
-    For all modes except periodization::
+    For all modes except periodization:
 
-        len(cA) == len(cD) == floor((len(data) + wavelet.dec_len - 1) / 2)
+    >>> from math import floor
+    >>> len(cA) == len(cD) == floor((len(data) + wavelet.dec_len - 1) / 2)
+    True
 
-    for periodization mode ("per")::
+    for periodization mode ("per"):
 
-        len(cA) == len(cD) == ceil(len(data) / 2)
+    >>> from math import ceil
+    >>> len(cA) == len(cD) == ceil(len(data) / 2)
+    True
 
     """
     if isinstance(filter_len, Wavelet):
@@ -102,17 +106,6 @@ def dwt(data, wavelet, mode='symmetric', axis=-1):
     -------
     (cA, cD) : tuple
         Approximation and detail coefficients.
-
-    Notes
-    -----
-    Length of coefficients arrays depends on the selected mode.
-    For all modes except periodization:
-
-        ``len(cA) == len(cD) == floor((len(data) + wavelet.dec_len - 1) / 2)``
-
-    For periodization mode ("per"):
-
-        ``len(cA) == len(cD) == ceil(len(data) / 2)``
 
     Examples
     --------
