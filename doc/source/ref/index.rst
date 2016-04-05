@@ -10,7 +10,6 @@ API Reference
    signal-extension-modes
    dwt-discrete-wavelet-transform
    idwt-inverse-discrete-wavelet-transform
-   2d-dwt-and-idwt
    nd-dwt-and-idwt
    swt-stationary-wavelet-transform
    wavelet-packets
