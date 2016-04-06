@@ -30,7 +30,8 @@ Differences to DWT
 ~~~~~~~~~~~~~~~~~~
 
 Unlike the DWT, this method produces several levels of the transform (the
-starting and ending levels can be specified).
+starting and ending levels can be specified). See :ref:`multilevel <reg-multilevel>`
+for details.
 
 Inverse Stationary Wavelet Transform
 ------------------------------------
