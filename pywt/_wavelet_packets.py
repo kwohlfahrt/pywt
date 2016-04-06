@@ -145,6 +145,11 @@ class BaseNode(object):
 
     @property
     def node_name(self):
+        """
+        The part of the node path referring to the coefficients of the node.
+
+        Refer to the sub-class documentation for valid values of this property.
+        """
         return self.path[-self.PART_LEN:]
 
     def decompose(self):
@@ -389,12 +394,24 @@ class Node(BaseNode):
 
     Subnodes are called `a` and `d`, just like approximation
     and detail coefficients in the Discrete Wavelet Transform.
+
+    See Also
+    --------
+    dwt : for the format of the output coefficients.
     """
 
     A = 'a'
     D = 'd'
     PARTS = A, D
     PART_LEN = 1
+
+    @property
+    def node_name(self):
+        """
+        For 1D packets, the `node_name` may be `'a'` for the approximation
+        coefficients, or `'d'` for the detail coefficients.
+        """
+        return super(Node, self).node_name
 
     def _create_subnode(self, part, data=None, overwrite=True):
         return self._create_subnode_base(node_cls=Node, part=part, data=data,
@@ -444,6 +461,10 @@ class Node2D(BaseNode):
 
     Subnodes are called 'a' (LL), 'h' (HL), 'v' (LH) and  'd' (HH), like
     approximation and detail coefficients in the 2D Discrete Wavelet Transform
+
+    See Also
+    --------
+    dwt2 : for the format of the output coefficients.
     """
 
     LL = 'a'
@@ -453,6 +474,16 @@ class Node2D(BaseNode):
 
     PARTS = LL, HL, LH, HH
     PART_LEN = 1
+
+    @property
+    def node_name(self):
+        """
+        For 2D packets, the `node_name` may be `'a'`, `'h'`, `'v'` or `'d'`.
+
+        These refer to the approximation (`LL`), horizontal detail (`LH`),
+        vertical detail (`HL`) and diagonal detail (`HH`) coefficients.
+        """
+        return super(Node2D, self).node_name
 
     def _create_subnode(self, part, data=None, overwrite=True):
         return self._create_subnode_base(node_cls=Node2D, part=part, data=data,

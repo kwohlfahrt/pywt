@@ -25,59 +25,27 @@ The diagram below illustrates the inheritance tree:
 
     - :class:`~pywt.WaveletPacket2D` - 2D decomposition tree root node
 
-BaseNode - a common interface of WaveletPacket and WaveletPacket2D
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Common Interface
+~~~~~~~~~~~~~~~~
 
 .. autoclass:: BaseNode
    :members:
    :special-members: __getitem__, __setitem__, __delitem__
 
-WaveletPacket and WaveletPacket tree Node
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1D Packets
+~~~~~~~~~~
 
-.. class:: Node(BaseNode)
-           WaveletPacket(Node)
-
-  .. attribute:: node_name
-
-     Node name describing :attr:`~BaseNode.data` coefficients type of the
-     current subnode.
-
-     For :class:`WaveletPacket` case it is just as in :func:`dwt`:
-        - ``a`` - approximation coefficients
-        - ``d`` - details coefficients
-
-  .. method:: decompose()
-
-    .. seealso::
-
-        - :func:`dwt` for 1D Discrete Wavelet Transform output coefficients.
-
+.. autoclass:: Node
+   :members:
 
 .. autoclass:: WaveletPacket
    :members:
 
-WaveletPacket2D and WaveletPacket2D tree Node2D
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2D Packets
+~~~~~~~~~~
 
-.. class:: Node2D(BaseNode)
-           WaveletPacket2D(Node2D)
-
-  .. attribute:: node_name
-
-     For :class:`WaveletPacket2D` case it is just as in :func:`dwt2`:
-        - ``a`` - approximation coefficients (`LL`)
-        - ``h`` - horizontal detail coefficients (`LH`)
-        - ``v`` - vertical detail coefficients (`HL`)
-        - ``d`` - diagonal detail coefficients (`HH`)
-
-  .. method:: decompose()
-
-     .. seealso::
-
-        :func:`dwt2` for 2D Discrete Wavelet Transform output coefficients.
-
-  .. method:: expand_2d_path(self, path):
+.. autoclass:: Node2D
+   :members:
 
 .. autoclass:: WaveletPacket2D
    :members:
