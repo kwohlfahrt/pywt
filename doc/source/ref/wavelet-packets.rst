@@ -54,37 +54,8 @@ WaveletPacket and WaveletPacket tree Node
         - :func:`dwt` for 1D Discrete Wavelet Transform output coefficients.
 
 
-.. class:: WaveletPacket(Node)
-
-  .. method:: __init__(data, wavelet, [mode='symmetric', [maxlevel=None]])
-
-     :param data: data associated with the node. 1D numeric array.
-
-     :param wavelet: |wavelet|
-
-     :param mode: Signal extension :ref:`mode <ref-modes>` for the :func:`dwt`
-                  and :func:`idwt` decomposition and reconstruction functions.
-
-     :param maxlevel: Maximum allowed level of decomposition. If not specified
-                      it will be calculated based on the *wavelet* and *data*
-                      length using :func:`pywt.dwt_max_level`.
-
-  .. method:: get_level(level, [order="natural", [decompose=True]])
-
-     Collects nodes from the given level of decomposition.
-
-     :param level: Specifies decomposition *level* from which the nodes will be
-                   collected.
-
-     :param order: Specifies nodes order - natural (``natural``) or frequency
-                   (``freq``).
-
-     :param decompose: If set then the method will try to decompose the data up
-                       to the specified *level*.
-
-     If nodes at the given level are missing (i.e. the tree is partially
-     decomposed) and the *decompose* is set to ``False``, only existing nodes
-     will be returned.
+.. autoclass:: WaveletPacket
+   :members:
 
 WaveletPacket2D and WaveletPacket2D tree Node2D
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,35 +79,5 @@ WaveletPacket2D and WaveletPacket2D tree Node2D
 
   .. method:: expand_2d_path(self, path):
 
-
-.. class:: WaveletPacket2D(Node2D)
-
-  .. method:: __init__(data, wavelet, [mode='symmetric', [maxlevel=None]])
-
-     :param data: data associated with the node. 2D numeric array.
-
-     :param wavelet: |wavelet|
-
-     :param mode: Signal extension :ref:`mode <ref-modes>` for the :func:`dwt`
-                  and :func:`idwt` decomposition and reconstruction functions.
-
-     :param maxlevel: Maximum allowed level of decomposition. If not specified
-                      it will be calculated based on the *wavelet* and *data*
-                      length using :func:`pywt.dwt_max_level`.
-
-  .. method:: get_level(level, [order="natural", [decompose=True]])
-
-     Collects nodes from the given level of decomposition.
-
-     :param level: Specifies decomposition *level* from which the nodes will be
-                   collected.
-
-     :param order: Specifies nodes order - natural (``natural``) or frequency
-                   (``freq``).
-
-     :param decompose: If set then the method will try to decompose the data up
-                       to the specified *level*.
-
-     If nodes at the given level are missing (i.e. the tree is partially
-     decomposed) and the *decompose* is set to ``False``, only existing nodes
-     will be returned.
+.. autoclass:: WaveletPacket2D
+   :members:

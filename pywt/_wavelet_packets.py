@@ -385,7 +385,7 @@ class BaseNode(object):
 
 class Node(BaseNode):
     """
-    WaveletPacket tree node.
+    1D WaveletPacket tree node.
 
     Subnodes are called `a` and `d`, just like approximation
     and detail coefficients in the Discrete Wavelet Transform.
@@ -586,7 +586,7 @@ class WaveletPacket(Node):
             - "freq" - band ordered
         decompose : bool, optional
             If set then the method will try to decompose the data up
-            to the specified `level` (default: True).
+            to the specified `level`.
 
         Notes
         -----
@@ -690,6 +690,12 @@ class WaveletPacket2D(Node2D):
         decompose : bool, optional
             If set then the method will try to decompose the data up
             to the specified `level` (default: True).
+
+        Notes
+        -----
+        If nodes at the given level are missing (i.e. the tree is partially
+        decomposed) and the `decompose` is set to False, only existing nodes
+        will be returned.
         """
         assert order in ["natural", "freq"]
         if level > self.maxlevel:
