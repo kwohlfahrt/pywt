@@ -15,6 +15,7 @@ examples illustrating how to use and how not to use PyWavelets.
    wavelet
    dwt-idwt
    swt-iswt
+   multidim
    multilevel
    wp
    wp2d
