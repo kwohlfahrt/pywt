@@ -28,10 +28,10 @@ class BaseNode(object):
     """
     BaseNode for wavelet packet 1D and 2D tree nodes.
 
-    The BaseNode is a base class for `Node` and `Node2D`.
-    It should not be used directly unless creating a new transformation
-    type. It is included here to document the common interface of 1D
-    and 2D node and wavelet packet transform classes.
+    The BaseNode is a base class for `Node` and `Node2D`. It should not be used
+    directly unless creating a new transformation type. It is included here to
+    document the common interface of 1D and 2D node and wavelet packet
+    transform classes.
 
     Parameters
     ----------
@@ -53,21 +53,20 @@ class BaseNode(object):
     PARTS = None
 
     def __init__(self, parent, data, node_name):
-        self.parent = parent
+        self.parent = parent  #: Parent node (``None`` for root node)
+        self.data = data  #: Data (signal or coefficients) of the node
+
         if parent is not None:
-            self.wavelet = parent.wavelet
-            self.mode = parent.mode
+            self.wavelet = parent.wavelet  #: Wavelet (inherited from parent)
+            self.mode = parent.mode  #: Signal extension mode (inherited from parent)
             self.level = parent.level + 1
             self._maxlevel = parent.maxlevel
             self.path = parent.path + node_name
         else:
             self.wavelet = None
             self.mode = None
-            self.path = ""
-            self.level = 0
-
-        # data - signal on level 0, coeffs on higher levels
-        self.data = data
+            self.path = ""  #: Path of the node in the tree
+            self.level = 0  #: Level of decomposition
 
         self._init_subnodes()
 
@@ -131,6 +130,8 @@ class BaseNode(object):
 
     @property
     def maxlevel(self):
+        """The maximum allowed level of decomposition. Evaluated from parent
+        or child nodes."""
         if self._maxlevel is not None:
             return self._maxlevel
 
@@ -153,11 +154,10 @@ class BaseNode(object):
         Performs Discrete Wavelet Transform on the `~BaseNode.data` and
         returns transform coefficients.
 
-        Note
-        ----
-        Descends to subnodes and recursively
-        calls `~BaseNode.reconstruct` on them.
-
+        Notes
+        -----
+        Descends to subnodes and recursively calls `~BaseNode.reconstruct` on
+        them.
         """
         if self.level < self.maxlevel:
             return self._decompose()
@@ -171,15 +171,24 @@ class BaseNode(object):
         """
         Reconstruct node from subnodes.
 
+        Performs Inverse Discrete Wavelet Transform on subnodes coefficients and
+        returns reconstructed data for the current level.
+
         Parameters
         ----------
         update : bool, optional
             If True, then reconstructed data replaces the current
             node data (default: False).
 
-        Returns:
-            - original node data if subnodes do not exist
-            - IDWT of subnodes otherwise.
+        Returns
+        -------
+        reconstruction : ndarray
+            IDWT of subnodes, or if none exist original node data
+
+        Notes
+        -----
+        Descends to subnodes and recursively calls
+        :meth:`~BaseNode.reconstruct` on them.
         """
         if not self.has_any_subnode:
             return self.data
@@ -248,8 +257,10 @@ class BaseNode(object):
         Parameters
         ----------
         path : str
-            String composed of node names.
-        data : array or BaseNode subclass.
+            String composed of node names. See `Node.node_name` and
+            `Node2D.node_name` for node naming convention.
+
+        data : ndarray or BaseNode subclass.
         """
 
         if isinstance(path, str):
@@ -275,12 +286,13 @@ class BaseNode(object):
 
     def __delitem__(self, path):
         """
-        Remove node from the tree.
+        Remove node at `path` from the tree.
 
         Parameters
         ----------
         path : str
-            String composed of node names.
+            String composed of node names. See `Node.node_name` and
+            `Node2D.node_name` for node naming convention.
         """
         node = self[path]
         # don't clear node value and subnodes (node may still exist outside
@@ -294,10 +306,12 @@ class BaseNode(object):
 
     @property
     def is_empty(self):
+        """Checks if `data` attribute is `None`"""
         return self.data is None
 
     @property
     def has_any_subnode(self):
+        """Checks if node has any subnodes (is not a leaf node)."""
         for part in self.PARTS:
             if self._get_node(part) is not None:  # and not .is_empty
                 return True
@@ -305,12 +319,13 @@ class BaseNode(object):
 
     def get_leaf_nodes(self, decompose=False):
         """
-        Returns leaf nodes.
+        Returns leaf nodes (nodes without any subnodes).
 
         Parameters
         ----------
         decompose : bool, optional
-            (default: True)
+            If ``True``, the method will try to decompose the tree up to the
+            maximum level.
         """
         result = []
 
@@ -336,10 +351,10 @@ class BaseNode(object):
         func : callable
             Callable accepting `BaseNode` as the first param and
             optional positional and keyword arguments
-        args :
-            func params
-        kwargs :
-            func keyword params
+        args : tuple
+            Positional arguments to pass to ``func``
+        kwargs : dict
+            Keyword arguments to pass to ``func``
         decompose : bool, optional
             If True (default), the method will also try to decompose the tree
             up to the `maximum level <BaseNode.maxlevel>`.
@@ -353,22 +368,8 @@ class BaseNode(object):
                     subnode.walk(func, args, kwargs, decompose)
 
     def walk_depth(self, func, args=(), kwargs=None, decompose=True):
-        """
-        Walk tree and call func on every node starting from the bottom-most
-        nodes.
+        """Like ``walk``, but traverses the tree in depth-first order."""
 
-        Parameters
-        ----------
-        func : callable
-            Callable accepting :class:`BaseNode` as the first param and
-            optional positional and keyword arguments
-        args :
-            func params
-        kwargs :
-            func keyword params
-        decompose : bool, optional
-            (default: False)
-        """
         if kwargs is None:
             kwargs = {}
         if self.level < self.maxlevel:
