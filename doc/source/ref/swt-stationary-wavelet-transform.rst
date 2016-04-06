@@ -1,7 +1,6 @@
 .. _ref-swt:
 
 .. currentmodule:: pywt
-.. include:: ../substitutions.rst
 
 
 Stationary Wavelet Transform

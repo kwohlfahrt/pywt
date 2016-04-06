@@ -1,7 +1,6 @@
 .. _ref-wp:
 
 .. currentmodule:: pywt
-.. include:: ../substitutions.rst
 
 ===============
 Wavelet Packets
