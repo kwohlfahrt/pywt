@@ -102,22 +102,26 @@ This method can be used to display the coefficients at each level:
 
     >>> import matplotlib.pyplot as plt, numpy as np
     >>> ecg_wp = pywt.WaveletPacket(pywt.data.ecg(), 'haar', 'symmetric')
-    >>> nodes = ecg_wp.get_level(3)
+    >>> nodes = list(reversed(ecg_wp.get_level(3)))
     >>> labels = [n.path for n in nodes]
-    >>> values = -abs(np.array([n.data for n in nodes]))
+    >>> values = abs(np.array([n.data for n in nodes]))
     >>> fig = plt.figure()
-    >>> ax = fig.add_subplot(1, 1, 1)
-    >>> ax.imshow(values, interpolation='nearest', aspect='auto', cmap='bone')
+    >>> ax_wp = fig.add_subplot(1, 2, 1)
+    >>> ax_wp.imshow(values, interpolation='nearest', aspect='auto', cmap='bone')
     ...
-    >>> ax.set_yticks(range(len(labels)))
+    >>> ax_wp.set_yticks(range(len(labels)))
     ...
-    >>> ax.set_yticklabels(labels)
+    >>> ax_wp.set_yticklabels(labels)
     ...
-    >>> plt.show()
 
-This will display the coefficients at level ``3``, with the approximation
-coefficients near the top of the image and the detail coefficients towards the
-bottom.
+This will display the coefficients at level ``3``, with the detail coefficients
+near the top of the image and the approximation coefficients towards the bottom.
+
+These coefficients resemble the spectrogram of the signal:
+
+    >>> ax_spec = fig.add_subplot(1, 2, 2)
+    >>> ax_spec.specgram(pywt.data.ecg(), NFFT=64, noverlap=32, cmap='bone')
+    >>> plt.show()
 
 Reconstructing data from Wavelet Packets:
 -----------------------------------------
