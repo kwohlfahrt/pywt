@@ -64,18 +64,18 @@ def dwt_coeff_len(data_len, filter_len, mode):
 
     Notes
     -----
-    For all modes except periodization:
+    Periodization mode produces a shorter decompositon than other modes:
 
-    >>> from math import floor
-    >>> len(cA) == len(cD) == floor((len(data) + wavelet.dec_len - 1) / 2)
-    True
-
-    for periodization mode ("per"):
-
+    >>> import pywt, numpy as np
     >>> from math import ceil
-    >>> len(cA) == len(cD) == ceil(len(data) / 2)
+    >>> data = np.arange(11)
+    >>> w = pywt.Wavelet('db4')
+    >>> cA, cD = pywt.dwt(data, w, 'symmetric')
+    >>> len(cA) == len(cD) == (len(data) + w.dec_len - 1) // 2
     True
-
+    >>> cA, cD = pywt.dwt(data, w, 'periodization')
+    >>> len(cA) == len(cD) == ceil(float(len(data)) / 2)
+    True
     """
     if isinstance(filter_len, Wavelet):
         filter_len = filter_len.dec_len
