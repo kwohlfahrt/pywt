@@ -177,8 +177,8 @@ def idwt(cA, cD, wavelet, mode='symmetric', axis=-1):
     --------
     >>> import pywt
     >>> (cA, cD) = pywt.dwt([1,2,3,4,5,6], 'db2', 'smooth')
-    >>> print pywt.idwt(cA, cD, 'db2', 'smooth')
-    array([ 1.,  2.,  3.,  4.,  5.,  6.])
+    >>> print(pywt.idwt(cA, cD, 'db2', 'smooth'))
+    [ 1.  2.  3.  4.  5.  6.]
 
     One of the useful features is that ``cA`` or ``cD`` can be set to ``None``.
     This is treated as though that coefficient was an array of zeros.
@@ -187,8 +187,8 @@ def idwt(cA, cD, wavelet, mode='symmetric', axis=-1):
     >>> (cA, cD) = pywt.dwt([1,2,3,4,5,6], 'db2', 'smooth')
     >>> A = pywt.idwt(cA, None, 'db2', 'smooth')
     >>> D = pywt.idwt(None, cD, 'db2', 'smooth')
-    >>> print A + D
-    array([ 1.,  2.,  3.,  4.,  5.,  6.])
+    >>> print(A + D)
+    [ 1.  2.  3.  4.  5.  6.]
     """
 
     # TODO: Lots of possible allocations to eliminate (zeros_like, asarray(rec))
